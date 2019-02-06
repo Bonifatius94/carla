@@ -39,6 +39,8 @@ public:
   // This is necessary for serializing sensors properly.
   carla::rpc::Actor SerializeActor(FActorView View) const;
 
+  bool CheckSensorStream(FActorView &ActorView);
+
 private:
 
   class FPimpl;

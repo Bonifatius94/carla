@@ -155,6 +155,21 @@ public:
     return Actor;
   }
 
+  bool CheckSensorStream(FActorView &ActorView)
+  {
+    auto *Sensor = Cast<ASensor>(ActorView.GetActor());
+    if (Sensor != nullptr)
+    {
+      auto Stream = GetSensorStream(ActorView, *Sensor);
+    }
+    else
+    {
+      UE_LOG(LogCarla, Warning, TEXT("Actor is not a sensor"));
+      return false;
+    }
+    return true;
+  }
+
 private:
 
   carla::streaming::Stream GetSensorStream(FActorView ActorView, ASensor &Sensor) {
@@ -167,6 +182,8 @@ private:
       it = result.first;
       Sensor.SetDataStream(it->second);
     }
+    // else
+      // UE_LOG(LogCarlaServer, Log, TEXT("Sensor '%s' already has stream"), *ActorView.GetActorDescription()->Id);
     return it->second;
   }
 
@@ -456,6 +473,7 @@ void FTheNewCarlaServer::NotifyBeginEpisode(UCarlaEpisode &Episode)
 {
   UE_LOG(LogCarlaServer, Log, TEXT("New episode '%s' started"), *Episode.GetMapName());
   Pimpl->Episode = &Episode;
+  Pimpl->Episode->SetServer(this); // from episode we need to call some sensor function here (in TheNewCarlaServer)
 }
 
 void FTheNewCarlaServer::NotifyEndEpisode()
@@ -485,4 +503,9 @@ void FTheNewCarlaServer::Stop()
 carla::rpc::Actor FTheNewCarlaServer::SerializeActor(FActorView View) const
 {
   return Pimpl->SerializeActor(View);
+}
+
+bool FTheNewCarlaServer::CheckSensorStream(FActorView &ActorView)
+{
+  return Pimpl->CheckSensorStream(ActorView);
 }
