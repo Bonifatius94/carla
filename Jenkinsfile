@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 pipeline
 {
     agent none
@@ -9,13 +11,27 @@ pipeline
 
     stages
     {
-        stage('windows and ubuntu in parallel')
+        stage('Creating nodes')
+        {
+            agent { label "master" }
+            steps
+            {
+                script
+                {
+                    JOB_ID = "${env.BUILD_TAG}"
+                    jenkinsLib = load("/home/jenkins/jenkins.groovy")
+                    
+                    jenkinsLib.CreateBuildNode(JOB_ID)
+                }
+            }
+        }
+        stage('Building CARLA')
         {
             parallel
             {
                 stage('ubuntu')
                 {
-                    agent { label 'ubuntu && build' }
+                    agent { label "ubuntu && build && ${JOB_ID}" }
                     environment
                     {
                         UE4_ROOT = '/home/jenkins/UnrealEngine_4.22'
@@ -77,17 +93,32 @@ pipeline
                                 sh 'make package ARGS="--packages=AdditionalMaps --clean-intermediate"'
                                 sh 'make examples ARGS="localhost 3654"'
                             }
-                            post {
-                                always {
+                            post 
+                            {
+                                always 
+                                {
                                     archiveArtifacts 'Dist/*.tar.gz'
                                     stash includes: 'Dist/CARLA*.tar.gz', name: 'ubuntu_package'
                                     stash includes: 'Examples/', name: 'ubuntu_examples'
+                                }
+                                success
+                                {
+                                    node('master')
+                                    {
+                                        script
+                                        {
+                                            JOB_ID = "${env.BUILD_TAG}"
+                                            jenkinsLib = load("/home/jenkins/jenkins.groovy")
+                                            
+                                            jenkinsLib.CreateTestNode(JOB_ID)
+                                        }
+                                    }
                                 }
                             }
                         }
                         stage('ubuntu smoke tests')
                         {
-                            agent { label 'ubuntu && gpu' }
+                            agent { label "ubuntu && gpu && ${JOB_ID}" }
                             steps
                             {
                                 unstash name: 'ubuntu_eggs'
@@ -104,6 +135,17 @@ pipeline
                                 {
                                     archiveArtifacts 'CarlaUE4.log'
                                     junit 'Build/test-results/smoke-tests-*.xml'
+                                    deleteDir()
+                                    node('master')
+                                    {
+                                        script
+                                        {
+                                            JOB_ID = "${env.BUILD_TAG}"
+                                            jenkinsLib = load("/home/jenkins/jenkins.groovy")
+                                            
+                                            jenkinsLib.DeleteTestNode(JOB_ID)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -124,6 +166,7 @@ pipeline
                                 sh 'rm -rf ~/carla-simulator.github.io/Doxygen'
                                 sh '''
                                     cd ~/carla-simulator.github.io
+                                    git fetch
                                     git checkout -B master origin/master
                                 '''
                                 sh 'make docs'
@@ -135,12 +178,26 @@ pipeline
                                     git push
                                 '''
                             }
+                            post
+                            {
+                                always
+                                {
+                                    deleteDir()
+                                }
+                            }
+                        }
+                        stage('Cleaning')
+                        {
+                            steps
+                            {
+                                deleteDir()
+                            }
                         }
                     }
                 }
                 // stage('windows')
                 // {
-                //     agent { label 'windows && build' }
+                //     agent { label "windows && build && ${JOB_ID}" }
                 //     environment
                 //     {
                 //         UE4_ROOT = 'C:\\Program Files\\Epic Games\\UE_4.22'
@@ -166,8 +223,8 @@ pipeline
                 //                     make LibCarla
                 //                     make PythonAPI
                 //                     make CarlaUE4Editor
-                //                 //     make examples
-                //                 // """
+                //                 """
+                //                 // make examples
                 //             }
                 //             post
                 //             {
@@ -199,9 +256,9 @@ pipeline
                 //                 bat """
                 //                     call ../setEnv64.bat
                 //                     make package
-                //                     make package ARGS="--packages=AdditionalMaps --clean-intermediate"
+                //                     make package ARGS="--packages=AdditionalMaps --clean"
                 //                 """
-                //                     // make examples ARGS="localhost 3654"
+                //                 // make examples ARGS="localhost 3654"
                 //             }
                 //             post {
                 //                 always {
@@ -226,22 +283,27 @@ pipeline
                 //             }
                 //         }
                 //     }
+                //     post 
+                //     {
+                //         always { deleteDir() }
+                //     }
                 // }
             }
         }
     }
-
-    post
+    post 
     {
-        always
-        {
-            node('build')
+        always 
+        { 
+            node('master')
             {
-                deleteDir()
-            }
-            node('gpu')
-            {
-                deleteDir()
+                script
+                {
+                    JOB_ID = "${env.BUILD_TAG}"
+                    jenkinsLib = load("/home/jenkins/jenkins.groovy")
+                    
+                    jenkinsLib.DeleteBuildNode(JOB_ID)
+                }
             }
         }
     }
