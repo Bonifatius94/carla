@@ -23,6 +23,8 @@
 #include "carla/profiler/LifetimeProfiled.h"
 #include "carla/rpc/TrafficLightState.h"
 
+#include "carla/client/Scoomatic.h"
+
 #include <memory>
 #include <optional>
 
@@ -370,6 +372,10 @@ namespace detail {
 
     void SetLightStateToVehicle(Vehicle &vehicle, const rpc::VehicleLightState light_state) {
       _client.SetLightStateToVehicle(vehicle.GetId(), light_state);
+    }
+
+    void ApplyControlToScoomatic(Scoomatic &scoomatic, const rpc::ScoomaticControl &control) {
+      _client.ApplyControlToScoomatic(scoomatic.GetId(), control);
     }
 
     /// @}
