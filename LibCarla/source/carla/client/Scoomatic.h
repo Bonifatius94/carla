@@ -15,10 +15,10 @@ namespace client {
 
     using ActorState::GetBoundingBox;
 
-    /// Apply @a control to this vehicle.
+    /// Apply @a control to this scoomatic.
     void ApplyControl(const Control &control);
 
-    /// Return the control last applied to this vehicle.
+    /// Return the control last applied to this scoomatic.
     ///
     /// @note This function does not call the simulator, it returns the data
     /// received in the last tick.

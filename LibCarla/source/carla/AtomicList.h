@@ -9,7 +9,6 @@
 #include "carla/AtomicSharedPtr.h"
 #include "carla/NonCopyable.h"
 
-#include <algorithm>
 #include <mutex>
 #include <vector>
 
@@ -48,9 +47,9 @@ namespace detail {
     template <typename ValueT>
     void DeleteByValue(const ValueT &value) {
       std::lock_guard<std::mutex> lock(_mutex);
-      auto new_list = std::make_shared<ListT>(*Load());
-      new_list->erase(std::remove(new_list->begin(), new_list->end(), value), new_list->end());
-      _list = new_list;
+      auto list = std::make_shared<ListT>(*Load());
+      list->erase(std::remove(list->begin(), list->end(), value), list->end());
+      _list = list;
     }
 
     void Clear() {

@@ -21,7 +21,7 @@ namespace client {
       _is_control_sticky(GetControlIsSticky(GetAttributes())) {}
 
   void Scoomatic::ApplyControl(const Control &control) {
-    if (!_is_control_sticky || (control != _control)) {
+    if (control != _control) {
       GetEpisode().Lock()->ApplyControlToScoomatic(*this, control);
       _control = control;
     }

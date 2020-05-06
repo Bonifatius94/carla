@@ -109,7 +109,7 @@ namespace element {
 
     /// Allow a lane change in the indicated direction taking into account that
     /// lanes are numbered in ascending order from right to left. If the
-    /// attribute is missing, “both” is assumed to be valid.
+    /// attributeis missing, “both” is assumed to be valid.
     LaneChange GetLaneChange() const {
       return _lane_change;
     }

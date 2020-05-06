@@ -289,11 +289,6 @@ FVehiclePhysicsControl ACarlaWheeledVehicle::GetVehiclePhysicsControl()
   return PhysicsControl;
 }
 
-FVehicleLightState ACarlaWheeledVehicle::GetVehicleLightState()
-{
-  return InputControl.LightState;
-}
-
 void ACarlaWheeledVehicle::ApplyVehiclePhysicsControl(const FVehiclePhysicsControl &PhysicsControl)
 {
   UWheeledVehicleMovementComponent4W *Vehicle4W = Cast<UWheeledVehicleMovementComponent4W>(
@@ -373,10 +368,4 @@ void ACarlaWheeledVehicle::ApplyVehiclePhysicsControl(const FVehiclePhysicsContr
     Vehicle4W->Wheels[i]->TireConfig->SetFrictionScale(PhysicsControl.Wheels[i].TireFriction);
   }
 
-}
-
-void ACarlaWheeledVehicle::SetVehicleLightState(const FVehicleLightState &LightState)
-{
-  InputControl.LightState = LightState;
-  RefreshLightState(LightState);
 }

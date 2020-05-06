@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Computer Vision Center (CVC) at the Universitat Autonoma
+// Copyright (c) 2017 Computer Vision Center (CVC) at the Universitat Autonoma
 // de Barcelona (UAB).
 //
 // This work is licensed under the terms of the MIT license.
@@ -86,14 +86,6 @@ static boost::python::object OptionalToPythonObject(OptionalT &optional) {
 #define CALL_RETURNING_LIST_2(cls, fn, T1_, T2_) +[](const cls &self, T1_ t1, T2_ t2) { \
       boost::python::list result; \
       for (auto &&item : self.fn(std::forward<T1_>(t1), std::forward<T2_>(t2))) { \
-        result.append(item); \
-      } \
-      return result; \
-    }
-
-#define CALL_RETURNING_LIST_3(cls, fn, T1_, T2_, T3_) +[](const cls &self, T1_ t1, T2_ t2, T3_ t3) { \
-      boost::python::list result; \
-      for (auto &&item : self.fn(std::forward<T1_>(t1), std::forward<T2_>(t2), std::forward<T3_>(t3))) { \
         result.append(item); \
       } \
       return result; \
@@ -194,11 +186,6 @@ static auto MakeCallback(boost::python::object callback) {
 #include "Weather.cpp"
 #include "World.cpp"
 #include "Commands.cpp"
-#include "TrafficManager.cpp"
-
-#ifdef LIBCARLA_RSS_ENABLED
-#include "AdRss.cpp"
-#endif
 
 BOOST_PYTHON_MODULE(libcarla) {
   using namespace boost::python;
@@ -217,8 +204,4 @@ BOOST_PYTHON_MODULE(libcarla) {
   export_client();
   export_exception();
   export_commands();
-  export_trafficmanager();
-  #ifdef LIBCARLA_RSS_ENABLED
-  export_ad_rss();
-  #endif
 }

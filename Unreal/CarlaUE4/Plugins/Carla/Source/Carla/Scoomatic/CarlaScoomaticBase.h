@@ -56,6 +56,10 @@ public:
     return GetActorTransform();
   }
 
+  /// Orientation vector of the scoomatic, pointing forward.
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  FVector GetScoomaticOrientation() const;
+
   /// Get Scoomatic's bounding box component.
   UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   UBoxComponent *GetScoomaticBoundingBox() const
@@ -63,11 +67,11 @@ public:
     return ScoomaticBounds;
   }
 
-  /// Transform of the vehicle's bounding box relative to the vehicle.
+  /// Transform of the scoomatic's bounding box relative to the vehicle.
   UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   FTransform GetScoomaticBoundingBoxTransform() const;
 
-  /// Extent of the vehicle's bounding box.
+  /// Extent of the scoomatic's bounding box.
   UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   FVector GetScoomaticBoundingBoxExtent() const;
 
@@ -81,11 +85,8 @@ public:
   UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   void ApplyScoomaticControl(const FScoomaticControl &Control, EScoomaticInputPriority Priority)
   {
-    if (InputControl.Priority <= Priority)
-    {
-      InputControl.Control = Control;
-      InputControl.Priority = Priority;
-    }
+    InputControl.Control = Control;
+    InputControl.Priority = Priority;
   }
 
   /// @todo This function should be private to AScoomaticBaseAIController.
@@ -104,6 +105,8 @@ public:
   UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   void SetRightVelocity(float Value);
 
+  
+
   /// @}
   // ===========================================================================
   /// @name Overriden from AActor
@@ -111,6 +114,23 @@ public:
   /// @{
 
 protected:
+
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  float GetLeftVelocity()
+  {
+    return VelocityLeft;
+  }
+
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  float GetRightVelocity()
+  {
+    return VelocityRight;
+  }
+
+  UPROPERTY(Category = "Scoomatic Attribute", VisibleAnywhere)
+  float VelocityLeft;
+  UPROPERTY(Category = "Scoomatic Attribute", VisibleAnywhere)
+  float VelocityRight;
 
   virtual void BeginPlay() override;
 

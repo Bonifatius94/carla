@@ -7,7 +7,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 
 namespace carla {
 namespace road {
@@ -22,11 +21,11 @@ namespace road {
 
   using ObjId = uint32_t;
 
-  using SignId = std::string;
+  using SignId = uint32_t;
+
+  using SignRefId = uint32_t;
 
   using ConId = uint32_t;
-
-  using ContId = std::string;
 
 } // road
 } // carla

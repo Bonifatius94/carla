@@ -22,6 +22,7 @@ public:
     Other,
     Vehicle,
     Walker,
+    Scoomatic,
     TrafficLight,
     INVALID
   };

@@ -11,7 +11,6 @@
 import glob
 import os
 import sys
-import time
 
 try:
     sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
@@ -68,16 +67,6 @@ def main():
         metavar='PATTERN',
         default='walker.pedestrian.*',
         help='pedestrians filter (default: "walker.pedestrian.*")')
-    argparser.add_argument(
-        '-tm_p', '--tm_port',
-        metavar='P',
-        default=8000,
-        type=int,
-        help='port to communicate with TM (default: 8000)')
-    argparser.add_argument(
-        '--sync',
-        action='store_true',
-        help='Synchronous mode execution')
     args = argparser.parse_args()
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
@@ -86,27 +75,11 @@ def main():
     walkers_list = []
     all_id = []
     client = carla.Client(args.host, args.port)
-    client.set_timeout(10.0)
+    client.set_timeout(2.0)
 
     try:
 
-        traffic_manager = client.get_trafficmanager(args.tm_port)
-        traffic_manager.set_global_distance_to_leading_vehicle(2.0)
         world = client.get_world()
-
-        synchronous_master = False
-
-        if args.sync:
-            settings = world.get_settings()
-            traffic_manager.set_synchronous_mode(True)
-            if not settings.synchronous_mode:
-                synchronous_master = True
-                settings.synchronous_mode = True
-                settings.fixed_delta_seconds = 0.05
-                world.apply_settings(settings)
-            else:
-                synchronous_master = False
-
         blueprints = world.get_blueprint_library().filter(args.filterv)
         blueprintsWalkers = world.get_blueprint_library().filter(args.filterw)
 
@@ -114,8 +87,6 @@ def main():
             blueprints = [x for x in blueprints if int(x.get_attribute('number_of_wheels')) == 4]
             blueprints = [x for x in blueprints if not x.id.endswith('isetta')]
             blueprints = [x for x in blueprints if not x.id.endswith('carlacola')]
-            blueprints = [x for x in blueprints if not x.id.endswith('cybertruck')]
-            blueprints = [x for x in blueprints if not x.id.endswith('t2')]
 
         spawn_points = world.get_map().get_spawn_points()
         number_of_spawn_points = len(spawn_points)
@@ -149,7 +120,7 @@ def main():
             blueprint.set_attribute('role_name', 'autopilot')
             batch.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True)))
 
-        for response in client.apply_batch_sync(batch, synchronous_master):
+        for response in client.apply_batch_sync(batch):
             if response.error:
                 logging.error(response.error)
             else:
@@ -158,9 +129,6 @@ def main():
         # -------------
         # Spawn Walkers
         # -------------
-        # some settings
-        percentagePedestriansRunning = 0.0      # how many pedestrians will run
-        percentagePedestriansCrossing = 0.0     # how many pedestrians will walk through the road
         # 1. take all the random locations to spawn
         spawn_points = []
         for i in range(args.number_of_walkers):
@@ -171,33 +139,18 @@ def main():
                 spawn_points.append(spawn_point)
         # 2. we spawn the walker object
         batch = []
-        walker_speed = []
         for spawn_point in spawn_points:
             walker_bp = random.choice(blueprintsWalkers)
-            # set as not invincible
+            # set as not invencible
             if walker_bp.has_attribute('is_invincible'):
                 walker_bp.set_attribute('is_invincible', 'false')
-            # set the max speed
-            if walker_bp.has_attribute('speed'):
-                if (random.random() > percentagePedestriansRunning):
-                    # walking
-                    walker_speed.append(walker_bp.get_attribute('speed').recommended_values[1])
-                else:
-                    # running
-                    walker_speed.append(walker_bp.get_attribute('speed').recommended_values[2])
-            else:
-                print("Walker has no speed")
-                walker_speed.append(0.0)
             batch.append(SpawnActor(walker_bp, spawn_point))
         results = client.apply_batch_sync(batch, True)
-        walker_speed2 = []
         for i in range(len(results)):
             if results[i].error:
                 logging.error(results[i].error)
             else:
                 walkers_list.append({"id": results[i].actor_id})
-                walker_speed2.append(walker_speed[i])
-        walker_speed = walker_speed2
         # 3. we spawn the walker controller
         batch = []
         walker_controller_bp = world.get_blueprint_library().find('controller.ai.walker')
@@ -216,52 +169,34 @@ def main():
         all_actors = world.get_actors(all_id)
 
         # wait for a tick to ensure client receives the last transform of the walkers we have just created
-        if not args.sync or not synchronous_master:
-            world.wait_for_tick()
-        else:
-            world.tick()
+        world.wait_for_tick()
 
         # 5. initialize each controller and set target to walk to (list is [controler, actor, controller, actor ...])
-        # set how many pedestrians can cross the road
-        world.set_pedestrians_cross_factor(percentagePedestriansCrossing)
         for i in range(0, len(all_id), 2):
             # start walker
             all_actors[i].start()
             # set walk to random point
             all_actors[i].go_to_location(world.get_random_location_from_navigation())
-            # max speed
-            all_actors[i].set_max_speed(float(walker_speed[int(i/2)]))
+            # random max speed
+            all_actors[i].set_max_speed(1 + random.random()/2)    # max speed between 1 and 1.5 (default is 1.4 m/s)
 
         print('spawned %d vehicles and %d walkers, press Ctrl+C to exit.' % (len(vehicles_list), len(walkers_list)))
 
-        # example of how to use parameters
-        traffic_manager.global_percentage_speed_difference(30.0)
-
         while True:
-            if args.sync and synchronous_master:
-                world.tick()
-            else:
-                world.wait_for_tick()
+            world.wait_for_tick()
 
     finally:
-
-        if args.sync and synchronous_master:
-            settings = world.get_settings()
-            settings.synchronous_mode = False
-            settings.fixed_delta_seconds = None
-            world.apply_settings(settings)
 
         print('\ndestroying %d vehicles' % len(vehicles_list))
         client.apply_batch([carla.command.DestroyActor(x) for x in vehicles_list])
 
-        # stop walker controllers (list is [controller, actor, controller, actor ...])
+        # stop walker controllers (list is [controler, actor, controller, actor ...])
         for i in range(0, len(all_id), 2):
             all_actors[i].stop()
 
         print('\ndestroying %d walkers' % len(walkers_list))
         client.apply_batch([carla.command.DestroyActor(x) for x in all_id])
 
-        time.sleep(0.5)
 
 if __name__ == '__main__':
 

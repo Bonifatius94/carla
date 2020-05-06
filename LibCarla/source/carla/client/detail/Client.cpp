@@ -15,12 +15,12 @@
 #include "carla/rpc/DebugShape.h"
 #include "carla/rpc/Response.h"
 #include "carla/rpc/VehicleControl.h"
-#include "carla/rpc/VehicleLightState.h"
 #include "carla/rpc/WalkerBoneControl.h"
 #include "carla/rpc/WalkerControl.h"
 #include "carla/streaming/Client.h"
 
 #include "carla/rpc/ScoomaticControl.h"
+
 
 #include <rpc/rpc_error.h>
 
@@ -50,7 +50,7 @@ namespace detail {
       : endpoint(host + ":" + std::to_string(port)),
         rpc_client(host, port),
         streaming_client(host) {
-      rpc_client.set_timeout(5000u);
+      rpc_client.set_timeout(1000u);
       streaming_client.AsyncRun(
           worker_threads > 0u ? worker_threads : std::thread::hardware_concurrency());
     }
@@ -104,22 +104,6 @@ namespace detail {
       const size_t worker_threads)
     : _pimpl(std::make_unique<Pimpl>(host, port, worker_threads)) {}
 
-  bool Client::IsTrafficManagerRunning(uint16_t port) const {
-    return _pimpl->CallAndWait<bool>("is_traffic_manager_running", port);
-  }
-
-  std::pair<std::string, uint16_t> Client::GetTrafficManagerRunning(uint16_t port) const {
-    return _pimpl->CallAndWait<std::pair<std::string, uint16_t>>("get_traffic_manager_running", port);
-  };
-
-  bool Client::AddTrafficManagerRunning(std::pair<std::string, uint16_t> trafficManagerInfo) const {
-    return _pimpl->CallAndWait<bool>("add_traffic_manager_running", trafficManagerInfo);
-  };
-
-  void Client::DestroyTrafficManager(uint16_t port) const {
-    _pimpl->AsyncCall("destroy_traffic_manager", port);
-  }
-
   Client::~Client() = default;
 
   void Client::SetTimeout(time_duration timeout) {
@@ -130,7 +114,7 @@ namespace detail {
     return _pimpl->GetTimeout();
   }
 
-  const std::string Client::GetEndpoint() const {
+  const std::string &Client::GetEndpoint() const {
     return _pimpl->endpoint;
   }
 
@@ -145,11 +129,6 @@ namespace detail {
   void Client::LoadEpisode(std::string map_name) {
     // Await response, we need to be sure in this one.
     _pimpl->CallAndWait<void>("load_new_episode", std::move(map_name));
-  }
-
-  void Client::CopyOpenDriveToServer(std::string opendrive) {
-    // Await response, we need to be sure in this one.
-    _pimpl->CallAndWait<void>("copy_opendrive_to_file", std::move(opendrive));
   }
 
   rpc::EpisodeInfo Client::GetEpisodeInfo() {
@@ -203,21 +182,10 @@ namespace detail {
     return _pimpl->CallAndWait<carla::rpc::VehiclePhysicsControl>("get_physics_control", vehicle);
   }
 
-  rpc::VehicleLightState Client::GetVehicleLightState(
-      const rpc::ActorId &vehicle) const {
-    return _pimpl->CallAndWait<carla::rpc::VehicleLightState>("get_vehicle_light_state", vehicle);
-  }
-
   void Client::ApplyPhysicsControlToVehicle(
       const rpc::ActorId &vehicle,
       const rpc::VehiclePhysicsControl &physics_control) {
     return _pimpl->AsyncCall("apply_physics_control", vehicle, physics_control);
-  }
-
-  void Client::SetLightStateToVehicle(
-      const rpc::ActorId &vehicle,
-      const rpc::VehicleLightState &light_state) {
-    return _pimpl->AsyncCall("apply_vehicle_light_state", vehicle, light_state);
   }
 
   rpc::Actor Client::SpawnActor(
@@ -344,10 +312,6 @@ namespace detail {
 
   void Client::SetReplayerTimeFactor(double time_factor) {
     _pimpl->AsyncCall("set_replayer_time_factor", time_factor);
-  }
-
-  void Client::SetReplayerIgnoreHero(bool ignore_hero) {
-    _pimpl->AsyncCall("set_replayer_ignore_hero", ignore_hero);
   }
 
   void Client::SubscribeToStream(

@@ -37,16 +37,10 @@ public class Carla : ModuleRules
       {
         "Core",
         "RenderCore",
-        "RHI",
-        "ProceduralMeshComponent"
+        "RHI"
         // ... add other public dependencies that you statically link with here ...
       }
       );
-
-	 if (Target.Type == TargetType.Editor)
-	 {
-		PublicDependencyModuleNames.AddRange(new string[] { "UnrealEd" });
-	 }
 
     PrivateDependencyModuleNames.AddRange(
       new string[]

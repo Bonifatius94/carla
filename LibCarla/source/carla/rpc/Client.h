@@ -37,7 +37,7 @@ namespace rpc {
     void async_call(const std::string &function, Args &&... args) {
       _client.async_call(function, Metadata::MakeAsync(), std::forward<Args>(args)...);
     }
-
+  
   private:
 
     ::rpc::client _client;

@@ -212,6 +212,28 @@ public:
 
 private:
 
+  FVehicleControl TickAutopilotController();
+
+  /// Returns steering value.
+  float GoToNextTargetLocation(FVector &Direction);
+
+  /// Returns steering value.
+  float CalcStreeringValue(FVector &Direction);
+
+  /// Returns throttle value.
+  float Stop(float Speed);
+
+  /// Returns throttle value.
+  float Move(float Speed);
+
+  /// @}
+  // ===========================================================================
+  // -- Member variables -------------------------------------------------------
+  // ===========================================================================
+  /// @{
+
+private:
+
   UPROPERTY()
   ACarlaWheeledVehicle *Vehicle = nullptr;
 

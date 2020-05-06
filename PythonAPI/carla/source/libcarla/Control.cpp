@@ -56,6 +56,8 @@ namespace rpc {
     return out;
   }
 
+
+
   std::ostream &operator<<(std::ostream &out, const GearPhysicsControl &control) {
     out << "GearPhysicsControl(ratio=" << std::to_string(control.ratio)
         << ", down_ratio=" << std::to_string(control.down_ratio)

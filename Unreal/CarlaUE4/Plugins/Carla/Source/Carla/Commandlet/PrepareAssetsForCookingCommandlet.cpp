@@ -6,11 +6,7 @@
 
 #include "PrepareAssetsForCookingCommandlet.h"
 
-#if WITH_EDITOR
-#include "FileHelpers.h"
-#endif
 #include "HAL/PlatformFilemanager.h"
-#include "UObject/ConstructorHelpers.h"
 
 UPrepareAssetsForCookingCommandlet::UPrepareAssetsForCookingCommandlet()
 {
@@ -24,20 +20,17 @@ UPrepareAssetsForCookingCommandlet::UPrepareAssetsForCookingCommandlet()
   // Get Carla Default materials, these will be used for maps that need to use
   // Carla materials
   static ConstructorHelpers::FObjectFinder<UMaterial> MarkingNode(TEXT(
-      "Material'/Game/Carla/Static/GenericMaterials/LaneMarking/M_MarkingLane_Y.M_MarkingLane_Y'"));
+      "Material'/Game/Carla/Static/GenericMaterials/LaneMarking/M_MarkingLane_W.M_MarkingLane_W'"));
   static ConstructorHelpers::FObjectFinder<UMaterial> RoadNode(TEXT(
       "Material'/Game/Carla/Static/GenericMaterials/Masters/LowComplexity/M_Road1.M_Road1'"));
   static ConstructorHelpers::FObjectFinder<UMaterial> RoadNodeAux(TEXT(
-      "Material'/Game/Carla/Static/GenericMaterials/LaneMarking/M_MarkingLane_W.M_MarkingLane_W'"));
+      "Material'/Game/Carla/Static/GenericMaterials/LaneMarking/M_MarkingLane_Y.M_MarkingLane_Y'"));
   static ConstructorHelpers::FObjectFinder<UMaterial> TerrainNodeMaterial(TEXT(
       "Material'/Game/Carla/Static/GenericMaterials/Grass/M_Grass01.M_Grass01'"));
-  static ConstructorHelpers::FObjectFinder<UMaterial> SidewalkNode(TEXT(
-      "Material'/Game/Carla/Static/GenericMaterials/CheapMaterials/M_SideWalkCheap01'"));
 
   MarkingNodeMaterial = (UMaterial *) MarkingNode.Object;
   RoadNodeMaterial = (UMaterial *) RoadNode.Object;
   MarkingNodeMaterialAux = (UMaterial *) RoadNodeAux.Object;
-  SidewalkNodeMaterial = (UMaterial *) SidewalkNode.Object;
 #endif
 }
 #if WITH_EDITORONLY_DATA
@@ -108,37 +101,15 @@ TArray<AStaticMeshActor *> UPrepareAssetsForCookingCommandlet::SpawnMeshesToWorl
     if (MeshAsset)
     {
       MeshActor = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), zeroTransform);
-      UStaticMeshComponent *MeshComponent = MeshActor->GetStaticMeshComponent();
-      MeshComponent->SetStaticMesh(CastChecked<UStaticMesh>(MeshAsset));
-
-      // Rename asset
-      FString AssetName;
-      MapAsset.AssetName.ToString(AssetName);
-      // Remove the prefix with the FBX name
-      int32 FindIndex = AssetName.Find("_", ESearchCase::IgnoreCase, ESearchDir::FromStart, 0);
-      if(FindIndex >= 0) {
-        AssetName.RemoveAt(0, FindIndex + 1, true);
-      }
-      MeshActor->SetActorLabel(AssetName, true);
-
-      // set complex collision as simple in asset
-      UBodySetup *BodySetup = MeshAsset->BodySetup;
-      if (BodySetup)
-      {
-        BodySetup->CollisionTraceFlag = CTF_UseComplexAsSimple;
-        MeshAsset->MarkPackageDirty();
-      }
-
-      // rotate all meshes 180 degrees to fit with OpenDRIVE info
-      // (seems that new version of RoadRunner is doing this)
-      // MeshActor->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+      MeshActor->GetStaticMeshComponent()->SetStaticMesh(CastChecked<UStaticMesh>(MeshAsset));
 
       SpawnedMeshes.Add(MeshActor);
-
       if (bUseCarlaMaterials)
       {
         // Set Carla Materials depending on RoadRunner's Semantic Segmentation
         // tag
+        FString AssetName;
+        MapAsset.AssetName.ToString(AssetName);
         if (AssetName.Contains(SSTags::R_MARKING))
         {
           MeshActor->GetStaticMeshComponent()->SetMaterial(0, MarkingNodeMaterial);
@@ -151,10 +122,6 @@ TArray<AStaticMeshActor *> UPrepareAssetsForCookingCommandlet::SpawnMeshesToWorl
         else if (AssetName.Contains(SSTags::R_TERRAIN))
         {
           MeshActor->GetStaticMeshComponent()->SetMaterial(0, TerrainNodeMaterial);
-        }
-        else if (AssetName.Contains(SSTags::R_SIDEWALK))
-        {
-          MeshActor->GetStaticMeshComponent()->SetMaterial(0, SidewalkNodeMaterial);
         }
       }
     }
@@ -228,7 +195,6 @@ bool UPrepareAssetsForCookingCommandlet::SaveWorld(
   {
     SavePackage(PackagePath, Package);
   }
-
   return bPackageSaved;
 }
 
@@ -328,7 +294,6 @@ bool UPrepareAssetsForCookingCommandlet::SavePackage(const FString &PackagePath,
     // Will not save package if it already exists
     return false;
   }
-
   return UPackage::SavePackage(Package, World, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone,
       *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
 }
@@ -387,10 +352,9 @@ void UPrepareAssetsForCookingCommandlet::PrepareMapsForCooking(
     FString RoadsPath     = BasePath + SSTags::ROAD       + MapPath;
     FString RoadLinesPath = BasePath + SSTags::ROADLINES  + MapPath;
     FString TerrainPath   = BasePath + SSTags::TERRAIN    + MapPath;
-    FString SidewalkPath  = BasePath + SSTags::SIDEWALK   + MapPath;
 
     // Spawn assets located in semantic segmentation fodlers
-    TArray<FString> DataPath = {DefaultPath, RoadsPath, RoadLinesPath, TerrainPath, SidewalkPath};
+    TArray<FString> DataPath = {DefaultPath, RoadsPath, RoadLinesPath, TerrainPath};
 
     TArray<AStaticMeshActor *> SpawnedActors = SpawnMeshesToWorld(DataPath, Map.bUseCarlaMapMaterials);
 
@@ -459,10 +423,6 @@ int32 UPrepareAssetsForCookingCommandlet::Main(const FString &Params)
     // Saves Package path for further use
     GeneratePackagePathFile(PackageParams.Name);
   }
-
-  #if WITH_EDITOR
-  UEditorLoadingAndSavingUtils::SaveDirtyPackages(true, true);
-  #endif
 
   return 0;
 }

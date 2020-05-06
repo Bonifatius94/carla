@@ -14,16 +14,11 @@ rem ============================================================================
 rem -- Parse arguments ---------------------------------------------------------
 rem ============================================================================
 
-set BUILD_UE4_EDITOR=false
 set LAUNCH_UE4_EDITOR=false
 set REMOVE_INTERMEDIATE=false
 
 :arg-parse
-echo %1
 if not "%1"=="" (
-    if "%1"=="--build" (
-        set BUILD_UE4_EDITOR=true
-    )
     if "%1"=="--launch" (
         set LAUNCH_UE4_EDITOR=true
     )
@@ -42,11 +37,9 @@ if not "%1"=="" (
 
 if %REMOVE_INTERMEDIATE% == false (
     if %LAUNCH_UE4_EDITOR% == false (
-        if %BUILD_UE4_EDITOR% == false (
-            echo Nothing selected to be done.
-            echo %USAGE_STRING%
-            goto eof
-        )
+        echo Nothing selected to be done.
+        echo %USAGE_STRING%
+        goto eof
     )
 )
 
@@ -85,30 +78,6 @@ if %REMOVE_INTERMEDIATE% == true (
     )
 )
 
-rem Build Carla Editor
-rem
-if %BUILD_UE4_EDITOR% == true (
-    echo %FILE_N% Building Unreal Editor...
-
-    call "%UE4_ROOT%\Engine\Build\BatchFiles\Build.bat"^
-        CarlaUE4Editor^
-        Win64^
-        Development^
-        -WaitMutex^
-        -FromMsBuild^
-        "%ROOT_PATH%Unreal/CarlaUE4/CarlaUE4.uproject"
-    if errorlevel 1 goto bad_exit
-
-    call "%UE4_ROOT%\Engine\Build\BatchFiles\Build.bat"^
-        CarlaUE4^
-        Win64^
-        Development^
-        -WaitMutex^
-        -FromMsBuild^
-        "%ROOT_PATH%Unreal/CarlaUE4/CarlaUE4.uproject"
-    if errorlevel 1 goto bad_exit
-)
-
 rem Launch Carla Editor
 rem
 if %LAUNCH_UE4_EDITOR% == true (
@@ -125,7 +94,7 @@ rem ============================================================================
 
 :help
     echo Build LibCarla.
-    echo "Usage: %FILE_N% [-h^|--help] [--build] [--launch] [--clean]"
+    echo "Usage: %FILE_N% [-h^|--help] [--launch] [--clean]"
     goto good_exit
 
 :error_build

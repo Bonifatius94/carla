@@ -7,8 +7,8 @@ CARLA Simulator
 [![carla.org](Docs/img/btn/web.png)](http://carla.org)
 [![download](Docs/img/btn/download.png)](https://github.com/carla-simulator/carla/blob/master/Docs/download.md)
 [![documentation](Docs/img/btn/docs.png)](http://carla.readthedocs.io)
-[![forum](Docs/img/btn/forum.png)](https://forum.carla.org)
 [![discord](Docs/img/btn/chat.png)](https://discord.gg/8kqACuC)
+<!-- [![forum](Docs/img/btn/forum.png)](link here) -->
 
 CARLA is an open-source simulator for autonomous driving research. CARLA has
 been developed from the ground up to support development, training, and
@@ -24,7 +24,7 @@ If you want to benchmark your model in the same conditions as in our CoRL’17
 paper, check out
 [Benchmarking](https://github.com/carla-simulator/driving-benchmarks).
 
-[**Get CARLA overnight build**](http://carla-releases.s3.amazonaws.com/Linux/Dev/CARLA_Latest.tar.gz)
+[**Get CARLA overnight build**](http://carla-assets-internal.s3.amazonaws.com/Releases/Linux/Dev/CARLA_Latest.tar.gz)
 
 ## CARLA Ecosystem
 Repositories associated to the CARLA simulation platform:
@@ -73,8 +73,8 @@ Then follow the instruction at [How to build on Linux][buildlinuxlink] or
 Unfortunately we don't have official instructions to build on Mac yet, please
 check the progress at [issue #150][issue150].
 
-[buildlinuxlink]: https://carla.readthedocs.io/en/latest/build_linux/
-[buildwindowslink]: https://carla.readthedocs.io/en/latest/build_windows/
+[buildlinuxlink]: http://carla.readthedocs.io/en/latest/how_to_build_on_linux
+[buildwindowslink]: http://carla.readthedocs.io/en/latest/how_to_build_on_windows
 [issue150]: https://github.com/carla-simulator/carla/issues/150
 
 Contributing
@@ -82,13 +82,13 @@ Contributing
 
 Please take a look at our [Contribution guidelines][contriblink].
 
-[contriblink]: https://carla.readthedocs.io/en/latest/cont_contribution_guidelines/
+[contriblink]: http://carla.readthedocs.io/en/latest/CONTRIBUTING
 
 F.A.Q.
 ------
 
 If you run into problems, check our
-[FAQ](https://carla.readthedocs.io/en/latest/build_faq/).
+[FAQ](http://carla.readthedocs.io/en/latest/faq/).
 
 License
 -------
@@ -96,7 +96,5 @@ License
 CARLA specific code is distributed under MIT License.
 
 CARLA specific assets are distributed under CC-BY License.
-
-The ad-rss-lib library compiled and linked by the [RSS Integration build variant](Docs/rss_lib_integration.md) introduces LGPL-2.1-only License.
 
 Note that UE4 itself follows its own license terms.

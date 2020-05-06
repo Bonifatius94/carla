@@ -8,7 +8,7 @@
 
 #include "CarlaScoomaticBaseState.generated.h"
 
-/// State of a ACarlaWheeledVehicle, to be displayed in editor for debugging
+/// State of a ACarlaScoomaticBase, to be displayed in editor for debugging
 /// purposes.
 UENUM(BlueprintType)
 enum class ECarlaScoomaticBaseState : uint8

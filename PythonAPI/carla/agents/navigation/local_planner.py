@@ -1,4 +1,7 @@
-# Copyright (c) # Copyright (c) 2018-2020 CVC.
+#!/usr/bin/env python
+
+# Copyright (c) 2018 Intel Labs.
+# authors: German Ros (german.ros@intel.com)
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
@@ -11,7 +14,7 @@ import random
 
 import carla
 from agents.navigation.controller import VehiclePIDController
-from agents.tools.misc import draw_waypoints
+from agents.tools.misc import distance_vehicle, draw_waypoints
 
 
 class RoadOption(Enum):
@@ -101,13 +104,13 @@ class LocalPlanner(object):
         self._min_distance = self._sampling_radius * self.MIN_DISTANCE_PERCENTAGE
         args_lateral_dict = {
             'K_P': 1.95,
-            'K_D': 0.2,
-            'K_I': 0.07,
+            'K_D': 0.01,
+            'K_I': 1.4,
             'dt': self._dt}
         args_longitudinal_dict = {
             'K_P': 1.0,
             'K_D': 0,
-            'K_I': 0.05,
+            'K_I': 1,
             'dt': self._dt}
 
         # parameters overload
@@ -118,7 +121,7 @@ class LocalPlanner(object):
                 self._target_speed = opt_dict['target_speed']
             if 'sampling_radius' in opt_dict:
                 self._sampling_radius = self._target_speed * \
-                                        opt_dict['sampling_radius'] / 3.6
+                    opt_dict['sampling_radius'] / 3.6
             if 'lateral_control_dict' in opt_dict:
                 args_lateral_dict = opt_dict['lateral_control_dict']
             if 'longitudinal_control_dict' in opt_dict:
@@ -126,8 +129,8 @@ class LocalPlanner(object):
 
         self._current_waypoint = self._map.get_waypoint(self._vehicle.get_location())
         self._vehicle_controller = VehiclePIDController(self._vehicle,
-                                                        args_lateral=args_lateral_dict,
-                                                        args_longitudinal=args_longitudinal_dict)
+                                                       args_lateral=args_lateral_dict,
+                                                       args_longitudinal=args_longitudinal_dict)
 
         self._global_plan = False
 
@@ -183,7 +186,7 @@ class LocalPlanner(object):
         self._target_road_option = RoadOption.LANEFOLLOW
         self._global_plan = True
 
-    def run_step(self, debug=False):
+    def run_step(self, debug=True):
         """
         Execute one step of local planning which involves running the longitudinal and lateral PID controllers to
         follow the waypoints trajectory.
@@ -196,7 +199,7 @@ class LocalPlanner(object):
         if not self._global_plan and len(self._waypoints_queue) < int(self._waypoints_queue.maxlen * 0.5):
             self._compute_next_waypoints(k=100)
 
-        if len(self._waypoints_queue) == 0 and len(self._waypoint_buffer) == 0:
+        if len(self._waypoints_queue) == 0:
             control = carla.VehicleControl()
             control.steer = 0.0
             control.throttle = 0.0
@@ -216,18 +219,19 @@ class LocalPlanner(object):
                     break
 
         # current vehicle waypoint
-        vehicle_transform = self._vehicle.get_transform()
-        self._current_waypoint = self._map.get_waypoint(vehicle_transform.location)
+        self._current_waypoint = self._map.get_waypoint(self._vehicle.get_location())
         # target waypoint
         self.target_waypoint, self._target_road_option = self._waypoint_buffer[0]
         # move using PID controllers
         control = self._vehicle_controller.run_step(self._target_speed, self.target_waypoint)
 
         # purge the queue of obsolete waypoints
+        vehicle_transform = self._vehicle.get_transform()
         max_index = -1
 
         for i, (waypoint, _) in enumerate(self._waypoint_buffer):
-            if waypoint.transform.location.distance(vehicle_transform.location) < self._min_distance:
+            if distance_vehicle(
+                    waypoint, vehicle_transform) < self._min_distance:
                 max_index = i
         if max_index >= 0:
             for i in range(max_index + 1):
@@ -238,8 +242,6 @@ class LocalPlanner(object):
 
         return control
 
-    def done(self):
-        return len(self._waypoints_queue) == 0 and len(self._waypoint_buffer) == 0
 
 def _retrieve_options(list_waypoints, current_waypoint):
     """
@@ -263,7 +265,7 @@ def _retrieve_options(list_waypoints, current_waypoint):
     return options
 
 
-def _compute_connection(current_waypoint, next_waypoint, threshold=35):
+def _compute_connection(current_waypoint, next_waypoint):
     """
     Compute the type of topological connection between an active waypoint (current_waypoint) and a target waypoint
     (next_waypoint).
@@ -282,7 +284,7 @@ def _compute_connection(current_waypoint, next_waypoint, threshold=35):
     c = c % 360.0
 
     diff_angle = (n - c) % 180.0
-    if diff_angle < threshold or diff_angle > (180 - threshold):
+    if diff_angle < 1.0:
         return RoadOption.STRAIGHT
     elif diff_angle > 90.0:
         return RoadOption.LEFT

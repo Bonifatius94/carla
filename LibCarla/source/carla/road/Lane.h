@@ -46,7 +46,7 @@ namespace road {
       Exit          = 0x1 << 18,
       OffRamp       = 0x1 << 19,
       OnRamp        = 0x1 << 20,
-      Any           = 0xFFFFFFFE
+      Any           = 0xFFFFFFFF
     };
 
   public:
@@ -77,12 +77,6 @@ namespace road {
     const T *GetInfo(const double s) const {
       DEBUG_ASSERT(_lane_section != nullptr);
       return _info.GetInfo<T>(s);
-    }
-
-    template <typename T>
-    std::vector<const T*> GetInfos() const {
-      DEBUG_ASSERT(_lane_section != nullptr);
-      return _info.GetInfos<T>();
     }
 
     const std::vector<Lane *> &GetNextLanes() const {

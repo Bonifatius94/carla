@@ -55,9 +55,6 @@ public:
   void NotifyWheeledVehicle(ACarlaWheeledVehicle *Vehicle);
 
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)
-  void UnNotifyWheeledVehicle(ACarlaWheeledVehicle *Vehicle);
-
-  UFUNCTION(Category = "Traffic Light", BlueprintCallable)
   void SetGreenTime(float InGreenTime);
 
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)

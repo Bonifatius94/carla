@@ -88,7 +88,7 @@ namespace client {
       rpc::AttachmentType attachment_type) noexcept {
     try {
       return SpawnActor(blueprint, transform, parent_actor, attachment_type);
-    } catch (const std::exception &) {
+    } catch (const std::exception &e) {
       return nullptr;
     }
   }
@@ -105,12 +105,8 @@ namespace client {
     _episode.Lock()->RemoveOnTickEvent(callback_id);
   }
 
-  uint64_t World::Tick(time_duration timeout) {
-    return _episode.Lock()->Tick(timeout);
-  }
-
-  void World::SetPedestriansCrossFactor(float percentage) {
-    _episode.Lock()->SetPedestriansCrossFactor(percentage);
+  uint64_t World::Tick() {
+    return _episode.Lock()->Tick();
   }
 
 } // namespace client

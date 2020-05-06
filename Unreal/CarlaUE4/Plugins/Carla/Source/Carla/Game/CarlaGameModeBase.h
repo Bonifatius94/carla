@@ -11,16 +11,11 @@
 #include "Carla/Game/CarlaGameInstance.h"
 #include "Carla/Recorder/CarlaRecorder.h"
 #include "Carla/Game/TaggerDelegate.h"
-#include "Carla/OpenDrive/OpenDrive.h"
 #include "Carla/Settings/CarlaSettingsDelegate.h"
 #include "Carla/Weather/Weather.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-
-#include <compiler/disable-ue4-macros.h>
-#include <boost/optional.hpp>
-#include <compiler/enable-ue4-macros.h>
 
 #include "CarlaGameModeBase.generated.h"
 
@@ -40,13 +35,6 @@ public:
     return *Episode;
   }
 
-  const boost::optional<carla::road::Map>& GetMap() const {
-    return Map;
-  }
-
-  UFUNCTION(Exec, CallInEditor, meta=(DevelopmentOnly))
-  void DebugShowSignals(bool enable);
-
 protected:
 
   void InitGame(const FString &MapName, const FString &Options, FString &ErrorMessage) override;
@@ -62,8 +50,6 @@ protected:
 private:
 
   void SpawnActorFactories();
-
-  void ParseOpenDrive(const FString &MapName);
 
   UPROPERTY()
   UCarlaGameInstance *GameInstance = nullptr;
@@ -91,7 +77,4 @@ private:
 
   UPROPERTY()
   TArray<ACarlaActorFactory *> ActorFactoryInstances;
-
-  boost::optional<carla::road::Map> Map;
-
 };

@@ -9,7 +9,7 @@
 #include "Engine/TargetPoint.h"
 #include "ScoomaticSpawnPoint.generated.h"
 
-/// Base class for spawner locations for walkers.
+/// Base class for spawner locations for scoomatics.
 UCLASS()
 class CARLA_API AScoomaticSpawnPoint : public ATargetPoint
 {

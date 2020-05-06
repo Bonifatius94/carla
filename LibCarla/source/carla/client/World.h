@@ -35,8 +35,6 @@ namespace client {
 
     explicit World(detail::EpisodeProxy episode) : _episode(std::move(episode)) {}
 
-    ~World(){}
-
     World(const World &) = default;
     World(World &&) = default;
 
@@ -117,21 +115,11 @@ namespace client {
     /// synchronous mode).
     ///
     /// @return The id of the frame that this call started.
-    uint64_t Tick(time_duration timeout);
-
-    /// set the probability that an agent could cross the roads in its path following
-    /// percentage of 0.0f means no pedestrian can cross roads
-    /// percentage of 0.5f means 50% of all pedestrians can cross roads
-    /// percentage of 1.0f means all pedestrians can cross roads if needed
-    void SetPedestriansCrossFactor(float percentage);
+    uint64_t Tick();
 
     DebugHelper MakeDebugHelper() const {
       return DebugHelper{_episode};
     }
-
-    detail::EpisodeProxy GetEpisode() const {
-      return _episode;
-    };
 
   private:
 

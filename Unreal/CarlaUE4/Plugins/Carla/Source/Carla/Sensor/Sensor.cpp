@@ -32,13 +32,6 @@ void ASensor::Set(const FActorDescription &Description)
   }
 }
 
-void ASensor::SetSeed(const int32 InSeed)
-{
-  check(RandomEngine != nullptr);
-  Seed = InSeed;
-  RandomEngine->Seed(InSeed);
-}
-
 void ASensor::PostActorCreated()
 {
   Super::PostActorCreated();

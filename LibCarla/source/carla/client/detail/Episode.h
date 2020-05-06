@@ -14,7 +14,6 @@
 #include "carla/client/detail/CachedActorList.h"
 #include "carla/client/detail/CallbackList.h"
 #include "carla/client/detail/EpisodeState.h"
-#include "carla/client/detail/WalkerNavigation.h"
 #include "carla/rpc/EpisodeInfo.h"
 
 #include <vector>
@@ -24,6 +23,7 @@ namespace client {
 namespace detail {
 
   class Client;
+  class WalkerNavigation;
 
   /// Holds the current episode, and the current episode state.
   ///
@@ -79,32 +79,17 @@ namespace detail {
       _on_tick_callbacks.Remove(id);
     }
 
-    void SetPedestriansCrossFactor(float percentage) {
-      auto nav = _navigation.load();
-      DEBUG_ASSERT(nav != nullptr);
-      nav->SetPedestriansCrossFactor(percentage);
-    }
-
-    void AddPendingException(std::string e) {
-      _pending_exceptions = true;
-      _pending_exceptions_msg = e;
-    }
-
   private:
 
     Episode(Client &client, const rpc::EpisodeInfo &info);
 
     void OnEpisodeStarted();
 
-    void OnEpisodeChanged();
-
     Client &_client;
 
     AtomicSharedPtr<const EpisodeState> _state;
 
     AtomicSharedPtr<WalkerNavigation> _navigation;
-
-    std::string _pending_exceptions_msg;
 
     CachedActorList _actors;
 
@@ -113,8 +98,6 @@ namespace detail {
     RecurrentSharedFuture<WorldSnapshot> _snapshot;
 
     const streaming::Token _token;
-
-    bool _pending_exceptions = false;
   };
 
 } // namespace detail

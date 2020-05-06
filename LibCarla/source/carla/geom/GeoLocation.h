@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include "carla/MsgPack.h"
-
 namespace carla {
 namespace geom {
 
@@ -56,8 +54,6 @@ namespace geom {
     bool operator!=(const GeoLocation &rhs) const {
       return !(*this == rhs);
     }
-
-    MSGPACK_DEFINE_ARRAY(latitude, longitude, altitude);
   };
 
 } // namespace geom

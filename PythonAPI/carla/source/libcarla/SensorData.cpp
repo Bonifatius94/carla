@@ -16,10 +16,8 @@
 #include <carla/sensor/data/Image.h>
 #include <carla/sensor/data/LaneInvasionEvent.h>
 #include <carla/sensor/data/LidarMeasurement.h>
-#include <carla/sensor/data/GnssMeasurement.h>
-#include <carla/sensor/data/RadarMeasurement.h>
-
-#include <carla/sensor/s11n/RadarData.h>
+#include <carla/sensor/data/GnssEvent.h>
+#include <carla/sensor/data/SafeDistanceEvent.h>
 
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -69,8 +67,8 @@ namespace data {
     return out;
   }
 
-  std::ostream &operator<<(std::ostream &out, const GnssMeasurement &meas) {
-    out << "GnssMeasurement(frame=" << std::to_string(meas.GetFrame())
+  std::ostream &operator<<(std::ostream &out, const GnssEvent &meas) {
+    out << "GnssEvent(frame=" << std::to_string(meas.GetFrame())
         << ", timestamp=" << std::to_string(meas.GetTimestamp())
         << ", lat=" << std::to_string(meas.GetLatitude())
         << ", lon=" << std::to_string(meas.GetLongitude())
@@ -89,28 +87,7 @@ namespace data {
     return out;
   }
 
-  std::ostream &operator<<(std::ostream &out, const RadarMeasurement &meas) {
-    out << "RadarMeasurement(frame=" << std::to_string(meas.GetFrame())
-        << ", timestamp=" << std::to_string(meas.GetTimestamp())
-        << ", point_count=" << std::to_string(meas.GetDetectionAmount())
-        << ')';
-    return out;
-  }
-
 } // namespace data
-
-namespace s11n {
-
-  std::ostream &operator<<(std::ostream &out, const RadarDetection &det) {
-    out << "RadarDetection(velocity=" << std::to_string(det.velocity)
-        << ", azimuth=" << std::to_string(det.azimuth)
-        << ", altitude=" << std::to_string(det.altitude)
-        << ", depth=" << std::to_string(det.depth)
-        << ')';
-    return out;
-  }
-
-} // namespace s11n
 } // namespace sensor
 } // namespace carla
 
@@ -194,7 +171,6 @@ void export_sensor_data() {
   namespace cr = carla::rpc;
   namespace cs = carla::sensor;
   namespace csd = carla::sensor::data;
-  namespace css = carla::sensor::s11n;
 
   class_<cs::SensorData, boost::noncopyable, boost::shared_ptr<cs::SensorData>>("SensorData", no_init)
     .add_property("frame", &cs::SensorData::GetFrame)
@@ -265,10 +241,10 @@ void export_sensor_data() {
     .def(self_ns::str(self_ns::self))
   ;
 
-  class_<csd::GnssMeasurement, bases<cs::SensorData>, boost::noncopyable, boost::shared_ptr<csd::GnssMeasurement>>("GnssMeasurement", no_init)
-    .add_property("latitude", &csd::GnssMeasurement::GetLatitude)
-    .add_property("longitude", &csd::GnssMeasurement::GetLongitude)
-    .add_property("altitude", &csd::GnssMeasurement::GetAltitude)
+  class_<csd::GnssEvent, bases<cs::SensorData>, boost::noncopyable, boost::shared_ptr<csd::GnssEvent>>("GnssEvent", no_init)
+    .add_property("latitude", &csd::GnssEvent::GetLatitude)
+    .add_property("longitude", &csd::GnssEvent::GetLongitude)
+    .add_property("altitude", &csd::GnssEvent::GetAltitude)
     .def(self_ns::str(self_ns::self))
   ;
 
@@ -279,25 +255,14 @@ void export_sensor_data() {
     .def(self_ns::str(self_ns::self))
   ;
 
-  class_<csd::RadarMeasurement, bases<cs::SensorData>, boost::noncopyable, boost::shared_ptr<csd::RadarMeasurement>>("RadarMeasurement", no_init)
-    .add_property("raw_data", &GetRawDataAsBuffer<csd::RadarMeasurement>)
-    .def("get_detection_count", &csd::RadarMeasurement::GetDetectionAmount)
-    .def("__len__", &csd::RadarMeasurement::size)
-    .def("__iter__", iterator<csd::RadarMeasurement>())
-    .def("__getitem__", +[](const csd::RadarMeasurement &self, size_t pos) -> css::RadarDetection {
+  class_<
+    csd::SafeDistanceEvent, bases<cs::SensorData>, boost::noncopyable,
+boost::shared_ptr<csd::SafeDistanceEvent>>("SafeDistanceEvent", no_init)
+    .def("__len__", &csd::SafeDistanceEvent::size)
+    .def("__iter__", iterator<csd::SafeDistanceEvent>())
+    .def("__getitem__", +[](const csd::SafeDistanceEvent &self, size_t pos) -> cr::ActorId {
       return self.at(pos);
     })
-    .def("__setitem__", +[](csd::RadarMeasurement &self, size_t pos, const css::RadarDetection &detection) {
-      self.at(pos) = detection;
-    })
-    .def(self_ns::str(self_ns::self))
   ;
 
-  class_<css::RadarDetection>("RadarDetection")
-    .def_readwrite("velocity", &css::RadarDetection::velocity)
-    .def_readwrite("azimuth", &css::RadarDetection::azimuth)
-    .def_readwrite("altitude", &css::RadarDetection::altitude)
-    .def_readwrite("depth", &css::RadarDetection::depth)
-    .def(self_ns::str(self_ns::self))
-  ;
 }

@@ -17,6 +17,8 @@
 #include "carla/road/RoadTypes.h"
 #include "carla/road/element/Geometry.h"
 #include "carla/road/element/RoadInfo.h"
+#include "carla/road/signal/Signal.h"
+#include "carla/road/signal/SignalReference.h"
 
 #include <unordered_map>
 #include <vector>
@@ -73,6 +75,14 @@ namespace road {
 
     const geom::CubicPolynomial &GetElevationOn(const double s) const;
 
+    carla::road::signal::Signal *GetSignal(const SignId id);
+
+    carla::road::signal::SignalReference *GetSignalRef(const SignRefId id);
+
+    std::unordered_map<SignId, signal::Signal> *getSignals();
+
+    std::unordered_map<SignId, signal::SignalReference> *getSignalReferences();
+
     /// Returns a directed point on the center of the road (lane 0),
     /// with the corresponding laneOffset and elevation records applied,
     /// on distance "s".
@@ -101,16 +111,6 @@ namespace road {
     template <typename T>
     const T *GetInfo(const double s) const {
       return _info.GetInfo<T>(s);
-    }
-
-    template <typename T>
-    std::vector<const T*> GetInfos() const {
-      return _info.GetInfos<T>();
-    }
-
-    template <typename T>
-    std::vector<const T*> GetInfosInRange(const double min_s, const double max_s) const {
-      return _info.GetInfos<T>(min_s, max_s);
     }
 
     auto GetLaneSections() const {
@@ -194,6 +194,10 @@ namespace road {
     std::vector<Road *> _nexts;
 
     std::vector<Road *> _prevs;
+
+    std::unordered_map<SignId, signal::Signal> _signals;
+
+    std::unordered_map<SignRefId, signal::SignalReference> _sign_ref;
   };
 
 } // road

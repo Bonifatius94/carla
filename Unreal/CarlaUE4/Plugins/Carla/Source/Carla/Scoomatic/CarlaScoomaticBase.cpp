@@ -37,6 +37,11 @@ void ACarlaScoomaticBase::BeginPlay()
 // -- Get functions ------------------------------------------------------------
 // =============================================================================
 
+FVector ACarlaScoomaticBase::GetScoomaticOrientation() const
+{
+  return GetScoomaticTransform().GetRotation().GetForwardVector();
+}
+
 FTransform ACarlaScoomaticBase::GetScoomaticBoundingBoxTransform() const
 {
   return ScoomaticBounds->GetRelativeTransform();
@@ -53,8 +58,8 @@ FVector ACarlaScoomaticBase::GetScoomaticBoundingBoxExtent() const
 
 void ACarlaScoomaticBase::FlushScoomaticControl()
 {
-  InputControl.Control.LeftVelocity = 0.0f;
-  InputControl.Control.RightVelocity = 0.0f;
+  VelocityLeft = InputControl.Control.LeftVelocity;
+  VelocityRight = InputControl.Control.RightVelocity;
   LastAppliedControl = InputControl.Control;
   InputControl.Priority = EScoomaticInputPriority::INVALID;
 }

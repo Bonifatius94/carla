@@ -16,7 +16,6 @@
 #include "carla/client/TimeoutException.h"
 #include "carla/client/WalkerAIController.h"
 #include "carla/client/detail/ActorFactory.h"
-#include "carla/trafficmanager/TrafficManager.h"
 #include "carla/sensor/Deserializer.h"
 
 #include <exception>
@@ -44,23 +43,10 @@ namespace detail {
     }
   }
 
-  static bool SynchronizeFrame(uint64_t frame, const Episode &episode, time_duration timeout) {
-    bool result = true;
-    auto start = std::chrono::system_clock::now();
+  static void SynchronizeFrame(uint64_t frame, const Episode &episode) {
     while (frame > episode.GetState()->GetTimestamp().frame) {
       std::this_thread::yield();
-      auto end = std::chrono::system_clock::now();
-      auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
-      if(timeout.to_chrono() < diff) {
-        result = false;
-        break;
-      }
     }
-    if(result) {
-      carla::traffic_manager::TrafficManager::Tick();
-    }
-
-    return result;
   }
 
   // ===========================================================================
@@ -96,15 +82,6 @@ namespace detail {
     throw_exception(std::runtime_error("failed to connect to newly created map"));
   }
 
-  EpisodeProxy Simulator::LoadOpenDriveEpisode(std::string opendrive) {
-    // The "OpenDriveMap" is an ".umap" located in:
-    // "carla/Unreal/CarlaUE4/Content/Carla/Maps/"
-    // It will load the last sended OpenDRIVE by client's "LoadOpenDriveEpisode()"
-    constexpr auto custom_opendrive_map = "OpenDriveMap";
-    _client.CopyOpenDriveToServer(std::move(opendrive));
-    return LoadEpisode(custom_opendrive_map);
-  }
-
   // ===========================================================================
   // -- Access to current episode ----------------------------------------------
   // ===========================================================================
@@ -138,13 +115,11 @@ namespace detail {
     return *result;
   }
 
-  uint64_t Simulator::Tick(time_duration timeout) {
+  uint64_t Simulator::Tick() {
     DEBUG_ASSERT(_episode != nullptr);
     const auto frame = _client.SendTickCue();
-    bool result = SynchronizeFrame(frame, *_episode, timeout);
-    if (!result) {
-      throw_exception(TimeoutException(_client.GetEndpoint(), timeout));
-    }
+    SynchronizeFrame(frame, *_episode);
+    RELEASE_ASSERT(frame == _episode->GetState()->GetTimestamp().frame);
     return frame;
   }
 
@@ -168,8 +143,7 @@ namespace detail {
           "recommended to set 'fixed_delta_seconds' when running on synchronous mode.");
     }
     const auto frame = _client.SetEpisodeSettings(settings);
-    using namespace std::literals::chrono_literals;
-    SynchronizeFrame(frame, *_episode, 10s);
+    SynchronizeFrame(frame, *_episode);
     return frame;
   }
 
@@ -206,13 +180,6 @@ namespace detail {
     auto navigation = _episode->CreateNavigationIfMissing();
     DEBUG_ASSERT(navigation != nullptr);
     return navigation->GetRandomLocation();
-  }
-
-  void Simulator::SetPedestriansCrossFactor(float percentage) {
-    DEBUG_ASSERT(_episode != nullptr);
-    auto navigation = _episode->CreateNavigationIfMissing();
-    DEBUG_ASSERT(navigation != nullptr);
-    navigation->SetPedestriansCrossFactor(percentage);
   }
 
   // ===========================================================================

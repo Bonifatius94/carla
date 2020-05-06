@@ -69,7 +69,7 @@ unset LLVM_BASENAME
 # -- Get boost includes --------------------------------------------------------
 # ==============================================================================
 
-BOOST_VERSION=1.72.0
+BOOST_VERSION=1.69.0
 BOOST_BASENAME="boost-${BOOST_VERSION}-${CXX_TAG}"
 
 BOOST_INCLUDE=${PWD}/${BOOST_BASENAME}-install/include
@@ -90,10 +90,6 @@ else
   tar -xzf ${BOOST_PACKAGE_BASENAME}.tar.gz
   mkdir -p ${BOOST_BASENAME}-install/include
   mv ${BOOST_PACKAGE_BASENAME} ${BOOST_BASENAME}-source
-  # Boost patch for exception handling
-  cp "${CARLA_BUILD_FOLDER}/../Util/BoostFiles/rational.hpp" "${BOOST_BASENAME}-source/boost/rational.hpp"
-  cp "${CARLA_BUILD_FOLDER}/../Util/BoostFiles/read.hpp" "${BOOST_BASENAME}-source/boost/geometry/io/wkt/read.hpp"
-  # ---
 
   pushd ${BOOST_BASENAME}-source >/dev/null
 
@@ -127,10 +123,6 @@ else
   tar -xzf ${BOOST_PACKAGE_BASENAME}.tar.gz
   mkdir -p ${BOOST_BASENAME}-install/include
   mv ${BOOST_PACKAGE_BASENAME} ${BOOST_BASENAME}-source
-  # Boost patch for exception handling
-  cp "${CARLA_BUILD_FOLDER}/../Util/BoostFiles/rational.hpp" "${BOOST_BASENAME}-source/boost/rational.hpp"
-  cp "${CARLA_BUILD_FOLDER}/../Util/BoostFiles/read.hpp" "${BOOST_BASENAME}-source/boost/geometry/io/wkt/read.hpp"
-  # ---
 
   pushd ${BOOST_BASENAME}-source >/dev/null
 
@@ -156,11 +148,6 @@ else
 
   rm -Rf ${BOOST_BASENAME}-source
   rm ${BOOST_PACKAGE_BASENAME}.tar.gz
-
-  # Boost patch for exception handling
-  cp "${CARLA_BUILD_FOLDER}/../Util/BoostFiles/rational.hpp" "${BOOST_BASENAME}-install/include/boost/rational.hpp"
-  cp "${CARLA_BUILD_FOLDER}/../Util/BoostFiles/read.hpp" "${BOOST_BASENAME}-install/include/boost/geometry/io/wkt/read.hpp"
-  # ---
 
 fi
 
@@ -302,15 +289,13 @@ unset GTEST_BASENAME
 # -- Get Recast&Detour and compile it with libc++ ------------------------------
 # ==============================================================================
 
-RECAST_HASH=cdce4e
-RECAST_COMMIT=cdce4e1a270fdf1f3942d4485954cc5e136df1df
-RECAST_BASENAME=recast-${RECAST_HASH}-${CXX_TAG}
+RECAST_COMMIT="c40188c796f089f89a42e0b939d934178dbcfc5c"
+RECAST_BASENAME=recast-${CXX_TAG}
 
 RECAST_INCLUDE=${PWD}/${RECAST_BASENAME}-install/include
 RECAST_LIBPATH=${PWD}/${RECAST_BASENAME}-install/lib
 
-if [[ -d "${RECAST_BASENAME}-install" &&
-      -f "${RECAST_BASENAME}-install/bin/RecastBuilder" ]] ; then
+if [[ -d "${RECAST_BASENAME}-install" ]] ; then
   log "${RECAST_BASENAME} already installed."
 else
   rm -Rf \
@@ -320,7 +305,7 @@ else
 
   log "Retrieving Recast & Detour"
 
-  git clone https://github.com/carla-simulator/recastnavigation.git ${RECAST_BASENAME}-source
+  git clone https://github.com/recastnavigation/recastnavigation.git ${RECAST_BASENAME}-source
 
   pushd ${RECAST_BASENAME}-source >/dev/null
 
@@ -353,12 +338,6 @@ else
   mkdir -p "${PWD}/${RECAST_BASENAME}-install/include/recast"
   mv "${PWD}/${RECAST_BASENAME}-install/include/"*h "${PWD}/${RECAST_BASENAME}-install/include/recast/"
 
-fi
-
-# make sure the RecastBuilder is corrctly copied
-RECAST_INSTALL_DIR="${CARLA_BUILD_FOLDER}/../Util/DockerUtils/dist"
-if [[ ! -f "${RECAST_INSTALL_DIR}/RecastBuilder" ]]; then
-  cp "${RECAST_BASENAME}-install/bin/RecastBuilder" "${RECAST_INSTALL_DIR}/"
 fi
 
 unset RECAST_BASENAME
@@ -400,7 +379,7 @@ set(CMAKE_CXX_FLAGS "\${CMAKE_CXX_FLAGS} -Wduplicate-enum -Wnon-virtual-dtor -Wh
 set(CMAKE_CXX_FLAGS "\${CMAKE_CXX_FLAGS} -Wconversion -Wfloat-overflow-conversion" CACHE STRING "" FORCE)
 
 # @todo These flags need to be compatible with setup.py compilation.
-set(CMAKE_CXX_FLAGS_RELEASE_CLIENT "\${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -fPIC -std=c++14 -Wno-missing-braces -DBOOST_ERROR_CODE_HEADER_ONLY" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE_CLIENT "\${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -fPIC -std=c++14 -Wno-missing-braces -DBOOST_ERROR_CODE_HEADER_ONLY -DLIBCARLA_WITH_PYTHON_SUPPORT" CACHE STRING "" FORCE)
 EOL
 
 # -- LIBCPP_TOOLCHAIN_FILE -----------------------------------------------------
