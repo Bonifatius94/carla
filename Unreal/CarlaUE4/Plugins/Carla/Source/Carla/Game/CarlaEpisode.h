@@ -20,6 +20,7 @@
 #include <carla/geom/BoundingBox.h>
 #include <carla/rpc/Actor.h>
 #include <carla/rpc/ActorDescription.h>
+#include <carla/rpc/OpendriveGenerationParameters.h>
 #include <carla/streaming/Server.h>
 #include <compiler/enable-ue4-macros.h>
 
@@ -53,6 +54,17 @@ public:
   UFUNCTION(BlueprintCallable)
   bool LoadNewEpisode(const FString &MapString);
 
+<<<<<<< HEAD
+=======
+  /// Load a new map generating the mesh from OpenDRIVE data and
+  /// start a new episode.
+  ///
+  /// If @a MapString is empty, it fails.
+  bool LoadNewOpendriveEpisode(
+      const FString &OpenDriveString,
+      const carla::rpc::OpendriveGenerationParameters &Params);
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   // ===========================================================================
   // -- Episode settings -------------------------------------------------------
   // ===========================================================================

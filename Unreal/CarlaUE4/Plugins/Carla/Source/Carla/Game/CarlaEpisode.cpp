@@ -11,6 +11,7 @@
 #include "Carla/Util/BoundingBoxCalculator.h"
 #include "Carla/Util/RandomEngine.h"
 #include "Carla/Vehicle/VehicleSpawnPoint.h"
+#include "Carla/Game/CarlaStatics.h"
 
 #include "EngineUtils.h"
 #include "Engine/StaticMeshActor.h"
@@ -100,6 +101,111 @@ bool UCarlaEpisode::LoadNewEpisode(const FString &MapString)
   return bIsFileFound;
 }
 
+<<<<<<< HEAD
+=======
+static FString BuildRecastBuilderFile()
+{
+  // Define filename with extension depending on if we are on Windows or not
+#if PLATFORM_WINDOWS
+  const FString RecastToolName = "RecastBuilder.exe";
+#else
+  const FString RecastToolName = "RecastBuilder";
+#endif // PLATFORM_WINDOWS
+
+  // Define path depending on the UE4 build type (Package or Editor)
+#if UE_BUILD_SHIPPING
+  const FString AbsoluteRecastBuilderPath = FPaths::ConvertRelativePathToFull(
+      FPaths::RootDir() + "Tools/" + RecastToolName);
+#else
+  const FString AbsoluteRecastBuilderPath = FPaths::ConvertRelativePathToFull(
+      FPaths::ProjectDir() + "../../Util/DockerUtils/dist/" + RecastToolName);
+#endif
+  return AbsoluteRecastBuilderPath;
+}
+
+bool UCarlaEpisode::LoadNewOpendriveEpisode(
+    const FString &OpenDriveString,
+    const carla::rpc::OpendriveGenerationParameters &Params)
+{
+  if (OpenDriveString.IsEmpty())
+  {
+    UE_LOG(LogCarla, Error, TEXT("The OpenDrive string is empty."));
+    return false;
+  }
+
+  // Build the Map from the OpenDRIVE data
+  const auto CarlaMap = carla::opendrive::OpenDriveParser::Load(
+      carla::rpc::FromFString(OpenDriveString));
+
+  // Check the Map is correclty generated
+  if (!CarlaMap.has_value())
+  {
+    UE_LOG(LogCarla, Error, TEXT("The OpenDrive string is invalid or not supported"));
+    return false;
+  }
+
+  // Generate the OBJ (as string)
+  const auto RoadMesh = CarlaMap->GenerateMesh(Params.vertex_distance);
+  const auto CrosswalksMesh = CarlaMap->GetAllCrosswalkMesh();
+  const auto RecastOBJ = (RoadMesh + CrosswalksMesh).GenerateOBJForRecast();
+
+  const FString AbsoluteOBJPath = FPaths::ConvertRelativePathToFull(
+      FPaths::ProjectContentDir() + "Carla/Maps/Nav/OpenDriveMap.obj");
+
+  // Store the OBJ string to a file in order to that RecastBuilder can load it
+  FFileHelper::SaveStringToFile(
+      carla::rpc::ToFString(RecastOBJ),
+      *AbsoluteOBJPath,
+      FFileHelper::EEncodingOptions::ForceUTF8,
+      &IFileManager::Get());
+
+  const FString AbsoluteXODRPath = FPaths::ConvertRelativePathToFull(
+      FPaths::ProjectContentDir() + "Carla/Maps/OpenDrive/OpenDriveMap.xodr");
+
+  // Copy the OpenDrive as a file in the serverside
+  FFileHelper::SaveStringToFile(
+      OpenDriveString,
+      *AbsoluteXODRPath,
+      FFileHelper::EEncodingOptions::ForceUTF8,
+      &IFileManager::Get());
+
+  if (!FPaths::FileExists(AbsoluteXODRPath))
+  {
+    UE_LOG(LogCarla, Error, TEXT("ERROR: XODR not copied!"));
+    return false;
+  }
+
+  UCarlaGameInstance * GameInstance = UCarlaStatics::GetGameInstance(GetWorld());
+  if(GameInstance)
+  {
+    GameInstance->SetOpendriveGenerationParameters(Params);
+  }
+  else
+  {
+    carla::log_warning("Missing game instance");
+  }
+
+  const FString AbsoluteRecastBuilderPath = BuildRecastBuilderFile();
+
+  if (FPaths::FileExists(AbsoluteRecastBuilderPath))
+  {
+    /// @todo this can take too long to finish, clients need a method
+    /// to know if the navigation is available or not.
+    FPlatformProcess::CreateProc(
+        *AbsoluteRecastBuilderPath, *AbsoluteOBJPath,
+        true, true, true, nullptr, 0, nullptr, nullptr);
+  }
+  else
+  {
+    UE_LOG(LogCarla, Warning, TEXT("'RecastBuilder' not present under '%s', "
+        "the binaries for pedestrian navigation will not be created."),
+        *AbsoluteRecastBuilderPath);
+  }
+
+  return true;
+}
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 void UCarlaEpisode::ApplySettings(const FEpisodeSettings &Settings)
 {
   FCarlaStaticDelegates::OnEpisodeSettingsChange.Broadcast(Settings);

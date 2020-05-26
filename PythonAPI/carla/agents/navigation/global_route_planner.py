@@ -281,10 +281,15 @@ class GlobalRoutePlanner(object):
             else:
                 self._intersection_end_node = -1
                 current_edge = self._graph.edges[previous_node, current_node]
+<<<<<<< HEAD
                 calculate_turn = current_edge['type'].value == RoadOption.LANEFOLLOW.value and \
                     not current_edge['intersection'] and \
                         next_edge['type'].value == RoadOption.LANEFOLLOW.value and \
                             next_edge['intersection']
+=======
+                calculate_turn = current_edge['type'] == RoadOption.LANEFOLLOW and not current_edge[
+                    'intersection'] and next_edge['type'] == RoadOption.LANEFOLLOW and next_edge['intersection']
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
                 if calculate_turn:
                     last_node, tail_edge = self._successive_last_intersection_edge(index, route)
                     self._intersection_end_node = last_node
@@ -294,7 +299,7 @@ class GlobalRoutePlanner(object):
                     cross_list = []
                     for neighbor in self._graph.successors(current_node):
                         select_edge = self._graph.edges[current_node, neighbor]
-                        if select_edge['type'].value == RoadOption.LANEFOLLOW.value:
+                        if select_edge['type'] == RoadOption.LANEFOLLOW:
                             if neighbor != route[index+1]:
                                 sv = select_edge['net_vector']
                                 cross_list.append(np.cross(cv, sv)[2])
@@ -315,8 +320,15 @@ class GlobalRoutePlanner(object):
                         decision = RoadOption.RIGHT
                 else:
                     decision = next_edge['type']
+<<<<<<< HEAD
         else:
             decision = next_edge['type']
+=======
+
+        else:
+            decision = next_edge['type']
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
         self._previous_decision = decision
 
         return decision
@@ -370,8 +382,12 @@ class GlobalRoutePlanner(object):
             edge = self._graph.edges[route[i], route[i+1]]
             path = []
 
+<<<<<<< HEAD
             if edge['type'].value != RoadOption.LANEFOLLOW.value and \
                 edge['type'].value != RoadOption.VOID.value:
+=======
+            if edge['type'] != RoadOption.LANEFOLLOW and edge['type'] != RoadOption.VOID:
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
                 route_trace.append((current_waypoint, road_option))
                 exit_wp = edge['exit_waypoint']
                 n1, n2 = self._road_id_to_edge[exit_wp.road_id][exit_wp.section_id][exit_wp.lane_id]

@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 <h1>Blueprint Library</h1>
+=======
+#Blueprint Library
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 The Blueprint Library ([`carla.BlueprintLibrary`](../python_api/#carlablueprintlibrary-class)) is a summary of all [`carla.ActorBlueprint`](../python_api/#carla.ActorBlueprint) and its attributes ([`carla.ActorAttribute`](../python_api/#carla.ActorAttribute)) available to the user in CARLA.  
 
 Here is an example code for printing all actor blueprints and their attributes:  
@@ -114,6 +118,20 @@ Check out our [blueprint tutorial](../python_api_tutorial/#blueprints).
         - `only_dynamics` (_Bool_)<sub>_ – Modifiable_</sub>
         - `role_name` (_String_)<sub>_ – Modifiable_</sub>
         - `sensor_tick` (_Float_)<sub>_ – Modifiable_</sub>
+<<<<<<< HEAD
+=======
+- **<font color="#498efc">sensor.other.radar</font>**  
+    - **Attributes:**
+        - `horizontal_fov` (_Float_)<sub>_ – Modifiable_</sub>
+        - `points_per_second` (_Int_)<sub>_ – Modifiable_</sub>
+        - `range` (_Float_)<sub>_ – Modifiable_</sub>
+        - `role_name` (_String_)<sub>_ – Modifiable_</sub>
+        - `sensor_tick` (_Float_)<sub>_ – Modifiable_</sub>
+        - `vertical_fov` (_Float_)<sub>_ – Modifiable_</sub>
+- **<font color="#498efc">sensor.other.rss</font>**  
+    - **Attributes:**
+        - `role_name` (_String_)<sub>_ – Modifiable_</sub>
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
 ### static
 - **<font color="#498efc">static.prop.advertisement</font>**  
@@ -579,7 +597,7 @@ Check out our [blueprint tutorial](../python_api_tutorial/#blueprints).
         - `object_type` (_String_)
         - `role_name` (_String_)<sub>_ – Modifiable_</sub>
         - `sticky_control` (_Bool_)<sub>_ – Modifiable_</sub>
-- **<font color="#498efc">vehicle.harley-davidson.low rider</font>**  
+- **<font color="#498efc">vehicle.harley-davidson.low_rider</font>**  
     - **Attributes:**
         - `color` (_RGBColor_)<sub>_ – Modifiable_</sub>
         - `driver_id` (_Int_)<sub>_ – Modifiable_</sub>

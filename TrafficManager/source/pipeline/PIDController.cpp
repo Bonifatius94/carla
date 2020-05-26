@@ -1,11 +1,31 @@
 #include "PIDController.h"
 
+<<<<<<< HEAD:TrafficManager/source/pipeline/PIDController.cpp
+=======
+#include "carla/trafficmanager/PIDController.h"
+
+#include <algorithm>
+
+#define CLAMP(__v, __hi, __lo) (__v > __hi? __hi : (__v < __lo? __lo: __v))
+
+namespace carla {
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:LibCarla/source/carla/trafficmanager/PIDController.cpp
 namespace traffic_manager {
 
 namespace PIDControllerConstants {
   const float MAX_THROTTLE = 0.8f;
   const float MAX_BRAKE = 1.0f;
+<<<<<<< HEAD:TrafficManager/source/pipeline/PIDController.cpp
 }
+=======
+  const float VELOCITY_INTEGRAL_MAX = 5.0f;
+  const float VELOCITY_INTEGRAL_MIN = -5.0f;
+  // PID will be stable only over 20 FPS.
+  const float dt = 1/20.0f;
+
+} // namespace PIDControllerConstants
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:LibCarla/source/carla/trafficmanager/PIDController.cpp
   using namespace PIDControllerConstants;
 
   PIDController::PIDController() {}
@@ -33,6 +53,11 @@ namespace PIDControllerConstants {
     // Calculating integrals.
     current_state.deviation_integral = angular_deviation * dt + previous_state.deviation_integral;
     current_state.velocity_integral = dt * current_state.velocity + previous_state.velocity_integral;
+
+    // Clamp velocity integral to avoid accumulating over-compensation
+    // with time for vehicles that take a long time to reach target velocity.
+    current_state.velocity_integral = CLAMP(current_state.velocity_integral,
+                                            VELOCITY_INTEGRAL_MAX, VELOCITY_INTEGRAL_MIN);
 
     return current_state;
   }

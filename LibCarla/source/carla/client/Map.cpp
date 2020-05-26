@@ -97,5 +97,80 @@ namespace client {
     return _map.GetGeoReference();
   }
 
+<<<<<<< HEAD
+=======
+  std::vector<geom::Location> Map::GetAllCrosswalkZones() const {
+    return _map.GetAllCrosswalkZones();
+  }
+
+  SharedPtr<Junction> Map::GetJunction(const Waypoint &waypoint) const {
+    const road::Junction *juncptr = GetMap().GetJunction(waypoint.GetJunctionId());
+    auto junction = SharedPtr<Junction>(new Junction(shared_from_this(), juncptr));
+    return junction;
+  }
+
+  std::vector<std::pair<SharedPtr<Waypoint>, SharedPtr<Waypoint>>> Map::GetJunctionWaypoints(
+      road::JuncId id,
+      road::Lane::LaneType lane_type) const {
+    std::vector<std::pair<SharedPtr<Waypoint>, SharedPtr<Waypoint>>> result;
+    auto junction_waypoints = GetMap().GetJunctionWaypoints(id, lane_type);
+    for (auto &waypoint_pair : junction_waypoints) {
+      result.emplace_back(
+      std::make_pair(SharedPtr<Waypoint>(new Waypoint(shared_from_this(), waypoint_pair.first)),
+      SharedPtr<Waypoint>(new Waypoint(shared_from_this(), waypoint_pair.second))));
+    }
+    return result;
+  }
+
+  std::vector<SharedPtr<Landmark>> Map::GetAllLandmarks() const {
+    std::vector<SharedPtr<Landmark>> result;
+    auto signal_references = _map.GetAllSignalReferences();
+    for(auto* signal_reference : signal_references) {
+      result.emplace_back(
+          new Landmark(nullptr, shared_from_this(), signal_reference, 0));
+    }
+    return result;
+  }
+
+  std::vector<SharedPtr<Landmark>> Map::GetLandmarksFromId(std::string id) const {
+    std::vector<SharedPtr<Landmark>> result;
+    auto signal_references = _map.GetAllSignalReferences();
+    for(auto* signal_reference : signal_references) {
+      if(signal_reference->GetSignalId() == id) {
+        result.emplace_back(
+            new Landmark(nullptr, shared_from_this(), signal_reference, 0));
+      }
+    }
+    return result;
+  }
+
+  std::vector<SharedPtr<Landmark>> Map::GetAllLandmarksOfType(std::string type) const {
+    std::vector<SharedPtr<Landmark>> result;
+    auto signal_references = _map.GetAllSignalReferences();
+    for(auto* signal_reference : signal_references) {
+      if(signal_reference->GetSignal()->GetType() == type) {
+        result.emplace_back(
+            new Landmark(nullptr, shared_from_this(), signal_reference, 0));
+      }
+    }
+    return result;
+  }
+
+  std::vector<SharedPtr<Landmark>>
+      Map::GetLandmarkGroup(const Landmark &landmark) const {
+    std::vector<SharedPtr<Landmark>> result;
+    auto &controllers = landmark._signal->GetSignal()->GetControllers();
+    for (auto& controller_id : controllers) {
+      const auto &controller = _map.GetControllers().at(controller_id);
+      for(auto& signal_id : controller->GetSignals()) {
+        auto& signal = _map.GetSignals().at(signal_id);
+        auto new_landmarks = GetLandmarksFromId(signal->GetSignalId());
+        result.insert(result.end(), new_landmarks.begin(), new_landmarks.end());
+      }
+    }
+    return result;
+  }
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 } // namespace client
 } // namespace carla

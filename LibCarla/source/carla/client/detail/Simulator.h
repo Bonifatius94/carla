@@ -23,11 +23,14 @@
 #include "carla/profiler/LifetimeProfiled.h"
 #include "carla/rpc/TrafficLightState.h"
 
+<<<<<<< HEAD
 #include "carla/client/Scoomatic.h"
 
+=======
+#include <boost/optional.hpp>
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
 #include <memory>
-#include <optional>
 
 namespace carla {
 namespace client {
@@ -70,6 +73,13 @@ namespace detail {
 
     EpisodeProxy LoadEpisode(std::string map_name);
 
+<<<<<<< HEAD
+=======
+    EpisodeProxy LoadOpenDriveEpisode(
+        std::string opendrive,
+        const rpc::OpendriveGenerationParameters & params);
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     /// @}
     // =========================================================================
     /// @name Access to current episode
@@ -285,6 +295,10 @@ namespace detail {
       _client.AddActorImpulse(actor.GetId(), vector);
     }
 
+    void AddActorAngularImpulse(const Actor &actor, const geom::Vector3D &vector) {
+      _client.AddActorAngularImpulse(actor.GetId(), vector);
+    }
+
     geom::Vector3D GetActorAcceleration(const Actor &actor) const {
       return GetActorSnapshot(actor).acceleration;
     }
@@ -433,10 +447,42 @@ namespace detail {
     }
 
     /// @}
+    // =========================================================================
+    /// @name Operations lights
+    // =========================================================================
+    /// @{
+
+    SharedPtr<LightManager> GetLightManager() const {
+      return _light_manager;
+    }
+
+    std::vector<rpc::LightState> QueryLightsStateToServer() const {
+      return _client.QueryLightsStateToServer();
+    }
+
+    void UpdateServerLightsState(
+        std::vector<rpc::LightState>& lights,
+        bool discard_client = false) const {
+      _client.UpdateServerLightsState(lights, discard_client);
+    }
+
+    size_t RegisterLightUpdateChangeEvent(std::function<void(WorldSnapshot)> callback) {
+      DEBUG_ASSERT(_episode != nullptr);
+      return _episode->RegisterLightUpdateChangeEvent(std::move(callback));
+    }
+
+    void RemoveLightUpdateChangeEvent(size_t id) {
+      DEBUG_ASSERT(_episode != nullptr);
+      _episode->RemoveLightUpdateChangeEvent(id);
+    }
+
+    /// @}
 
   private:
 
     Client _client;
+
+    SharedPtr<LightManager> _light_manager;
 
     std::shared_ptr<Episode> _episode;
 

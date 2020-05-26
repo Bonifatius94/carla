@@ -8,6 +8,28 @@
 
 #include "HAL/PlatformFilemanager.h"
 
+static bool ValidateStaticMesh(UStaticMesh* Mesh) {
+  FString AssetName = Mesh->GetName();
+
+  if (  AssetName.Contains(TEXT("light"), ESearchCase::IgnoreCase) ||
+        AssetName.Contains(TEXT("sign"),  ESearchCase::IgnoreCase) ) {
+    return false;
+  }
+
+  for(int i = 0; i < Mesh->StaticMaterials.Num(); i++) {
+      UMaterialInterface* Material = Mesh->GetMaterial(i);
+      FString MaterialName = Material->GetName();
+
+      if (  MaterialName.Contains(TEXT("light"), ESearchCase::IgnoreCase) ||
+            MaterialName.Contains(TEXT("sign"),  ESearchCase::IgnoreCase) ) {
+        return false;
+      }
+  }
+
+  return true;
+}
+
+
 UPrepareAssetsForCookingCommandlet::UPrepareAssetsForCookingCommandlet()
 {
   // Set necessary flags to run commandlet
@@ -98,10 +120,33 @@ TArray<AStaticMeshActor *> UPrepareAssetsForCookingCommandlet::SpawnMeshesToWorl
   {
     // Spawn Static Mesh
     MeshAsset = Cast<UStaticMesh>(MapAsset.GetAsset());
-    if (MeshAsset)
+    if (MeshAsset && ValidateStaticMesh(MeshAsset) )
     {
       MeshActor = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), zeroTransform);
+<<<<<<< HEAD
       MeshActor->GetStaticMeshComponent()->SetStaticMesh(CastChecked<UStaticMesh>(MeshAsset));
+=======
+      UStaticMeshComponent *MeshComponent = MeshActor->GetStaticMeshComponent();
+      MeshComponent->SetStaticMesh(CastChecked<UStaticMesh>(MeshAsset));
+
+      // Rename asset
+      FString AssetName;
+      MapAsset.AssetName.ToString(AssetName);
+      // Remove the prefix with the FBX name
+      int32 FindIndex = AssetName.Find("_", ESearchCase::IgnoreCase, ESearchDir::FromStart, 0);
+      if(FindIndex >= 0) {
+        AssetName.RemoveAt(0, FindIndex + 1, true);
+      }
+      MeshActor->SetActorLabel(AssetName, true);
+
+      // set complex collision as simple in asset
+      UBodySetup *BodySetup = MeshAsset->BodySetup;
+      if (BodySetup)
+      {
+        BodySetup->CollisionTraceFlag = CTF_UseComplexAsSimple;
+        MeshAsset->MarkPackageDirty();
+      }
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
       SpawnedMeshes.Add(MeshActor);
       if (bUseCarlaMaterials)

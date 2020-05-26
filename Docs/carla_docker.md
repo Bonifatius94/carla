@@ -44,7 +44,11 @@ docker pull carlasim/carla:0.8.2
 Running CARLA under docker:
 
 ```sh
+<<<<<<< HEAD:Docs/carla_docker.md
 docker run -p 2000-2002:2000-2002 --runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=0 carlasim/carla:0.8.4
+=======
+docker run -p 2000-2002:2000-2002 --runtime=nvidia --gpus all carlasim/carla:0.8.4
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:Docs/build_docker.md
 ```
 
 The `-p 2000-2002:2000-2002` argument is to redirect host ports for the docker container.

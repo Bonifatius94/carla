@@ -461,6 +461,10 @@ void ASceneCaptureSensor::BeginPlay()
   SceneCaptureSensor_local_ns::ConfigureShowFlags(CaptureComponent2D->ShowFlags,
       bEnablePostProcessingEffects);
 
+  // This ensures the camera is always spawning the rain drops in case the
+  // weather was previously set to has rain
+  GetEpisode().GetWeather()->NotifyWeather();
+
   Super::BeginPlay();
 }
 
@@ -569,7 +573,7 @@ namespace SceneCaptureSensor_local_ns {
 
     ShowFlags.SetAmbientOcclusion(false);
     ShowFlags.SetAntiAliasing(false);
-    ShowFlags.SetAtmosphericFog(false);
+    ShowFlags.SetVolumetricFog(false); // ShowFlags.SetAtmosphericFog(false);
     // ShowFlags.SetAudioRadius(false);
     // ShowFlags.SetBillboardSprites(false);
     ShowFlags.SetBloom(false);
@@ -691,8 +695,8 @@ namespace SceneCaptureSensor_local_ns {
     // ShowFlags.SetVertexColors(false);
     // ShowFlags.SetVignette(false);
     // ShowFlags.SetVisLog(false);
-    ShowFlags.SetVisualizeAdaptiveDOF(false);
-    ShowFlags.SetVisualizeBloom(false);
+    // ShowFlags.SetVisualizeAdaptiveDOF(false);
+    // ShowFlags.SetVisualizeBloom(false);
     ShowFlags.SetVisualizeBuffer(false);
     ShowFlags.SetVisualizeDistanceFieldAO(false);
     ShowFlags.SetVisualizeDistanceFieldGI(false);

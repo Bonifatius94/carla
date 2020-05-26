@@ -1,6 +1,5 @@
 ---
 - module_name: carla
-  doc: >
   # - CLASSES ------------------------------
   classes:
   - class_name: LaneType
@@ -62,6 +61,7 @@
     instance_variables:
     - var_name: NONE
       doc: >
+<<<<<<< HEAD
         Traffic rules do not allow turning right or left, only going straight
     - var_name: Right
       doc: >
@@ -72,6 +72,18 @@
     - var_name: Both
       doc: >
         Traffic rules allow turning right or left
+=======
+        Traffic rules do not allow turning right or left, only going straight.
+    - var_name: Right
+      doc: >
+        Traffic rules allow turning right.
+    - var_name: Left
+      doc: >
+        Traffic rules allow turning left.
+    - var_name: Both
+      doc: >
+        Traffic rules allow turning either right or left.
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
   - class_name: LaneMarkingColor
     # - DESCRIPTION ------------------------
@@ -111,6 +123,7 @@
       doc: >
     - var_name: SolidSolid
       doc: >
+<<<<<<< HEAD
         For double solid line.
     - var_name: SolidBroken
       doc: >
@@ -121,11 +134,22 @@
     - var_name: BrokenBroken
       doc: >
         From inside to outside except for center lane which is from left to right.
+=======
+    - var_name: SolidBroken
+      doc: >
+    - var_name: BrokenSolid
+      doc: >
+    - var_name: BrokenBroken
+      doc: >
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     - var_name: BottsDots
       doc: >
     - var_name: Grass
       doc: >
+<<<<<<< HEAD
         Grass edge.
+=======
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     - var_name: Curb
       doc: >
 
@@ -157,6 +181,62 @@
         Constructor for this class useful if you want to use a `XODR` (OpenDRIVE) file without
         importing it from any Carla server running
     # --------------------------------------
+    - def_name: save_to_disk
+      params:
+      - param_name: path
+        doc: >
+          Path where the file will be saved.
+      doc: >
+        Saves the .xodr OpenDRIVE file of the current map to disk.
+    # --------------------------------------
+    - def_name: to_opendrive
+      doc: >
+        Returns the .xodr OpenDRIVe file of the current map as string.
+      return: str
+    # --------------------------------------
+    - def_name: transform_to_geolocation
+      params:
+      - param_name: location
+        type: carla.Location
+      return: carla.GeoLocation
+      doc: >
+        Converts a given `location`, a point in the simulation, to a carla.GeoLocation, which represents world coordinates. The geographical location of the map is defined inside OpenDRIVE within the tag <b><georeference></b>.
+    # --------------------------------------
+    - def_name: get_all_landmarks
+      doc: >
+        Returns all the landmarks in the map. Landmarks retrieved using this method have a __null__ waypoint.
+      return: list(carla.Landmark)
+    # --------------------------------------
+    - def_name: get_all_landmarks_from_id
+      doc: >
+        Returns the landmarks with a certain OpenDRIVE ID. Landmarks retrieved using this method have a __null__ waypoint.
+      params:
+      - param_name: opendrive_id
+        type: string
+        doc: >
+          The OpenDRIVE ID of the landmarks.
+      return: list(carla.Landmark)
+    # --------------------------------------
+    - def_name: get_all_landmarks_of_type
+      doc: >
+        Returns the landmarks of a specific type. Landmarks retrieved using this method have a __null__ waypoint.
+      params:
+      - param_name: type
+        type: string
+        doc: >
+          The type of the landmarks.
+      return: list(carla.Landmark)
+    # --------------------------------------
+    - def_name: get_landmark_group
+      doc: >
+        Returns the landmarks in the same group as the specified landmark (including itself). Returns an empty list if the landmark does not belong to any group.
+      params:
+      - param_name: landmark
+        type: carla.Landmark
+        doc: >
+          A landmark that belongs to the group.
+      return: list(carla.Landmark)
+    # --------------------------------------
     - def_name: get_spawn_points
       return: list(carla.Transform)
       doc: >
@@ -186,6 +266,7 @@
     # --------------------------------------
     - def_name: get_topology
       doc: >
+<<<<<<< HEAD
         It provides a minimal graph of the topology of the current OpenDRIVE file.
         It is constituted by a list of pairs of waypoints, where the first waypoint is the origin and the second
         one is the destination. It can be loaded into [NetworkX](https://networkx.github.io/). A valid output could be:
@@ -226,6 +307,24 @@
       doc: >
         Save the OpenDRIVE of the current map to disk
     # --------------------------------------
+=======
+        Returns a waypoint if all the parameters passed are correct. Otherwise, returns __None__.
+      params:
+      - param_name: road_id
+        type: int
+        doc: >
+          ID of the road to get the waypoint.
+      - param_name: lane_id
+        type: int
+        doc: >
+          ID of the lane to get the waypoint.
+      - param_name: s
+        type: float
+        doc: >
+          Specify the length from the road start.
+      return: carla.Waypoint
+    # --------------------------------------
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     - def_name: __str__
       doc: >
     # --------------------------------------
@@ -335,11 +434,101 @@
         The list may be empty if the road ends before the specified distance, for instance,
         a lane ending with the only option of incorporating to another road.
     # --------------------------------------
+<<<<<<< HEAD
     - def_name: get_right_lane
       return: carla.Waypoint
       doc: >
         Generates a Waypoint at the center of the right lane based on the direction of the current
         Waypoint, regardless if the lane change is allowed in this location.  
+=======
+    - def_name: next_until_lane_end
+      params:
+      - param_name: distance
+        type: float
+        doc: >
+          The approximate distance between waypoints
+      return: list(carla.Waypoint)
+      doc: >
+        Returns a list of waypoints from this to the end of the lane separated by a certain `distance`.
+    # --------------------------------------
+    - def_name: previous
+      params:
+      - param_name: distance
+        type: float
+        doc: >
+          The approximate distance where to get the previous waypoints.
+      return: list(carla.Waypoint)
+      doc: >
+        This method does not return the waypoint previously visited by an actor, but a list of waypoints at an approximate `distance` but in the opposite direction of the lane. Similarly to **<font color="#7fb800">next()</font>**, it takes into account the road and its possible deviations without performing any lane change and returns one waypoint per option.
+
+        The list may be empty if the lane is not connected to any other at the specified distance.
+    # --------------------------------------
+    - def_name: previous_until_lane_start
+      params:
+      - param_name: distance
+        type: float
+        doc: >
+          The approximate distance between waypoints
+      return: list(carla.Waypoint)
+      doc: >
+        Returns a list of waypoints from this to the start of the lane separated by a certain `distance`.
+    # --------------------------------------
+    - def_name: get_junction
+      return: carla.Junction
+      doc: >
+        If the waypoint belongs to a junction this function returns the asociated junction object. Otherwise returns null.
+    # --------------------------------------
+    - def_name: get_landmarks
+      params:
+      - param_name: distance
+        type: float
+        doc: >
+          The maximum distance to search for landmarks from the current waypoint.
+      - param_name: stop_at_junction
+        type: bool
+        default: False
+        doc: >
+          Enables or disables the landmark search through junctions.
+      return: list(carla.Landmark)
+      doc: >
+        Returns a list of landmarks in the road from the current waypoint until the specified distance.
+    # --------------------------------------
+    - def_name: get_landmarks_of_type
+      params:
+      - param_name: distance
+        type: float
+        doc: >
+          The maximum distance to search for landmarks from the current waypoint.
+      - param_name: type
+        type: str
+        doc: >
+          The type of landmarks to search.
+      - param_name: stop_at_junction
+        type: bool
+        default: False
+        doc: >
+          Enables or disables the landmark search through junctions.
+      return: list(carla.Landmark)
+      doc: >
+        Returns a list of landmarks in the road of a specified type from the current waypoint until the specified distance.
+    # --------------------------------------
+    - def_name: get_left_lane
+      return: carla.Waypoint
+      doc: >
+        Generates a Waypoint at the center of the left lane based on the direction of the current Waypoint, taking into account if the lane change is allowed in this location.
+
+        Will return <b>None</b> if the lane does not exist
+    # --------------------------------------
+    - def_name: get_right_lane
+      return: carla.Waypoint
+      doc: >
+        Generates a waypoint at the center of the right lane based on the direction of the current waypoint, taking into account if the lane change is allowed in this location.
+
+        Will return <b>None</b> if the lane does not exist.
+    # --------------------------------------
+    - def_name: __str__
+    # --------------------------------------
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
         Can return `None` if the lane does not exist.
     # --------------------------------------

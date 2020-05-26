@@ -115,6 +115,15 @@ function build_libcarla {
     M_TOOLCHAIN=${LIBSTDCPP_TOOLCHAIN_FILE}
     M_BUILD_FOLDER=${LIBCARLA_BUILD_CLIENT_FOLDER}.$(echo "$2" | tr '[:upper:]' '[:lower:]')
     M_INSTALL_FOLDER=${LIBCARLA_INSTALL_CLIENT_FOLDER}
+<<<<<<< HEAD
+=======
+  elif [ $1 == ClientRSS ] ; then
+    BUILD_TYPE='Client'
+    M_TOOLCHAIN=${LIBSTDCPP_TOOLCHAIN_FILE}
+    M_BUILD_FOLDER=${LIBCARLA_BUILD_CLIENT_FOLDER}.rss.$(echo "$2" | tr '[:upper:]' '[:lower:]')
+    M_INSTALL_FOLDER=${LIBCARLA_INSTALL_CLIENT_FOLDER}
+    CMAKE_EXTRA_OPTIONS="${CMAKE_EXTRA_OPTIONS:+${CMAKE_EXTRA_OPTIONS} }-DBUILD_RSS_VARIANT=ON -DADRSS_INSTALL_DIR=${CARLA_BUILD_FOLDER}/ad-rss-3.0.0/install"
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   else
     fatal_error "Invalid build configuration \"$1\""
   fi

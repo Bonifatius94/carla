@@ -79,6 +79,36 @@ namespace detail {
       _on_tick_callbacks.Remove(id);
     }
 
+<<<<<<< HEAD
+=======
+    size_t RegisterOnMapChangeEvent(std::function<void(WorldSnapshot)> callback) {
+      return _on_map_change_callbacks.Push(std::move(callback));
+    }
+
+    void RemoveOnMapChangeEvent(size_t id) {
+      _on_map_change_callbacks.Remove(id);
+    }
+
+    size_t RegisterLightUpdateChangeEvent(std::function<void(WorldSnapshot)> callback) {
+      return _on_light_update_callbacks.Push(std::move(callback));
+    }
+
+    void RemoveLightUpdateChangeEvent(size_t id) {
+      _on_light_update_callbacks.Remove(id);
+    }
+
+    void SetPedestriansCrossFactor(float percentage) {
+      auto nav = _navigation.load();
+      DEBUG_ASSERT(nav != nullptr);
+      nav->SetPedestriansCrossFactor(percentage);
+    }
+
+    void AddPendingException(std::string e) {
+      _pending_exceptions = true;
+      _pending_exceptions_msg = e;
+    }
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   private:
 
     Episode(Client &client, const rpc::EpisodeInfo &info);
@@ -94,6 +124,10 @@ namespace detail {
     CachedActorList _actors;
 
     CallbackList<WorldSnapshot> _on_tick_callbacks;
+
+    CallbackList<WorldSnapshot> _on_map_change_callbacks;
+
+    CallbackList<WorldSnapshot> _on_light_update_callbacks;
 
     RecurrentSharedFuture<WorldSnapshot> _snapshot;
 

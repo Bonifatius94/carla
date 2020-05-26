@@ -9,6 +9,8 @@
 #include "carla/Memory.h"
 #include "carla/Time.h"
 #include "carla/client/DebugHelper.h"
+#include "carla/client/Landmark.h"
+#include "carla/client/LightManager.h"
 #include "carla/client/Timestamp.h"
 #include "carla/client/WorldSnapshot.h"
 #include "carla/client/detail/EpisodeProxy.h"
@@ -19,7 +21,7 @@
 #include "carla/rpc/VehiclePhysicsControl.h"
 #include "carla/rpc/WeatherParameters.h"
 
-#include <optional>
+#include <boost/optional.hpp>
 
 namespace carla {
 namespace client {
@@ -29,6 +31,8 @@ namespace client {
   class ActorList;
   class BlueprintLibrary;
   class Map;
+  class TrafficLight;
+  class TrafficSign;
 
   class World {
   public:
@@ -116,6 +120,12 @@ namespace client {
     ///
     /// @return The id of the frame that this call started.
     uint64_t Tick();
+
+    SharedPtr<Actor> GetTrafficSign(const Landmark& landmark) const;
+
+    SharedPtr<Actor> GetTrafficLight(const Landmark& landmark) const;
+
+    SharedPtr<LightManager> GetLightManager() const;
 
     DebugHelper MakeDebugHelper() const {
       return DebugHelper{_episode};

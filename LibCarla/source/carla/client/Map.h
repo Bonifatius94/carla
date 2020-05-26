@@ -11,7 +11,11 @@
 #include "carla/road/Map.h"
 #include "carla/road/element/LaneMarking.h"
 #include "carla/rpc/MapInfo.h"
+<<<<<<< HEAD
 #include "carla/road/Lane.h"
+=======
+#include "Landmark.h"
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
 #include <string>
 
@@ -65,6 +69,30 @@ namespace client {
 
     const geom::GeoLocation &GetGeoReference() const;
 
+<<<<<<< HEAD
+=======
+    std::vector<geom::Location> GetAllCrosswalkZones() const;
+
+    SharedPtr<Junction> GetJunction(const Waypoint &waypoint) const;
+
+    /// Returns a pair of waypoints (start and end) for each lane in the
+    /// junction
+    std::vector<std::pair<SharedPtr<Waypoint>, SharedPtr<Waypoint>>> GetJunctionWaypoints(
+        road::JuncId id, road::Lane::LaneType type) const;
+
+    /// Returns all the larndmarks in the map
+    std::vector<SharedPtr<Landmark>> GetAllLandmarks() const;
+
+    /// Returns all the larndmarks in the map with a specific OpenDRIVE id
+    std::vector<SharedPtr<Landmark>> GetLandmarksFromId(std::string id) const;
+
+    /// Returns all the landmarks in the map of a specific type
+    std::vector<SharedPtr<Landmark>> GetAllLandmarksOfType(std::string type) const;
+
+    /// Returns all the landmarks in the same group including this one
+    std::vector<SharedPtr<Landmark>> GetLandmarkGroup(const Landmark &landmark) const;
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   private:
 
     const rpc::MapInfo _description;

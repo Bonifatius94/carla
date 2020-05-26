@@ -31,3 +31,17 @@ void AWeather::ApplyWeather(const FWeatherParameters &InWeather)
   // Call the blueprint that actually changes the weather.
   RefreshWeather(Weather);
 }
+<<<<<<< HEAD
+=======
+
+void AWeather::NotifyWeather()
+{
+  // Call the blueprint that actually changes the weather.
+  RefreshWeather(Weather);
+}
+
+void AWeather::SetWeather(const FWeatherParameters &InWeather)
+{
+  Weather = InWeather;
+}
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd

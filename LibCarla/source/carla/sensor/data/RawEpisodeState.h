@@ -58,6 +58,12 @@ namespace data {
     double GetDeltaSeconds() const {
       return GetHeader().delta_seconds;
     }
+
+    /// Simulation state flags
+    Serializer::SimulationState GetSimulationState() const {
+      return GetHeader().simulation_state;
+    }
+
   };
 
 } // namespace data

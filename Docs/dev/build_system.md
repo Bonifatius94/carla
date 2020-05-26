@@ -26,7 +26,7 @@ make setup
 
 Get and compile dependencies
 
-  * llvm-7.1 (libc++ and libc++abi)
+  * llvm-8 (libc++ and libc++abi)
   * rpclib-2.2.1 (twice, with libstdc++ and libc++)
   * boost-1.69 (headers only)
   * googletest-1.8.1 (with libc++)
@@ -83,7 +83,7 @@ make PythonAPI
 It creates two "egg" packages
 
   * `PythonAPI/dist/carla-X.X.X-py2.7-linux-x86_64.egg`
-  * `PythonAPI/dist/carla-X.X.X-py3.5-linux-x86_64.egg`
+  * `PythonAPI/dist/carla-X.X.X-py3.7-linux-x86_64.egg`
 
 This package can be directly imported into a Python script by adding it to the
 system path
@@ -106,5 +106,5 @@ or installed with `easy_install`
 
 ```sh
 easy_install2 --user --no-deps PythonAPI/dist/carla-X.X.X-py2.7-linux-x86_64.egg
-easy_install3 --user --no-deps PythonAPI/dist/carla-X.X.X-py3.5-linux-x86_64.egg
+easy_install3 --user --no-deps PythonAPI/dist/carla-X.X.X-py3.7-linux-x86_64.egg
 ```

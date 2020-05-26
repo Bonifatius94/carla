@@ -77,6 +77,18 @@ namespace client {
 
     road::element::LaneMarking::LaneChange GetLaneChange() const;
 
+<<<<<<< HEAD
+=======
+    /// Returns a list of landmarks from the current position to a certain distance
+    std::vector<SharedPtr<Landmark>> GetAllLandmarksInDistance(
+        double distance, bool stop_at_junction = false) const;
+
+    /// Returns a list of landmarks from the current position to a certain distance
+    /// Filters by specified type
+    std::vector<SharedPtr<Landmark>> GetLandmarksOfTypeInDistance(
+        double distance, std::string filter_type, bool stop_at_junction = false) const;
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   private:
 
     friend class Map;
