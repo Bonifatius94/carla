@@ -2,13 +2,16 @@
 
 After discussing about the world and its actors, it is time to put everything into place and understand the map and how do the actors navigate it.  
 
-* [__The map__](#the-map)  
-	* Map changing  
-	* Lanes  
-	* Junctions  
-	* Waypoints  
-* [__Navigation in CARLA__](#navigation-in-carla)  
-* [__CARLA maps__](#carla-maps)  
+*   [__The map__](#the-map)  
+	*   [Changing the map](#changing-the-map)  
+	*   [Landmarks](#landmarks)  
+	*   [Lanes](#lanes)  
+	*   [Junctions](#junctions)  
+	*   [Waypoints](#waypoints)  
+*   [__Navigation in CARLA__](#navigation-in-carla)  
+	*   [Navigating through waypoints](#navigating-through-waypoints)  
+	*   [Generating a map navigation](#generating-a-map-navigation)  
+*   [__CARLA maps__](#carla-maps)  
 
 ---
 ## The map
@@ -32,11 +35,26 @@ The client can get a list of available maps. Each map has a `name` attribute tha
 print(client.get_available_maps())
 ```
 
+### Landmarks
+
+The traffic signs defined in the OpenDRIVE file are translated into CARLA as landmark objects that can be queried from the API. In order to facilitate their manipulation, there have been several additions to it.  
+
+*   __[carla.Landmark](https://carla.readthedocs.io/en/latest/python_api/#carla.Landmark)__ objects represent the OpenDRIVE signals. The attributes and methods describe the landmark, and where it is effective.  
+	*	[__carla.LandmarkOrientation__](https://carla.readthedocs.io/en/latest/python_api/#carla.LandmarkOrientation) states the orientation of the landmark with regards of the road's geometry definition.  
+	*	[__carla.LandmarkType__](https://carla.readthedocs.io/en/latest/python_api/#carla.LandmarkType) contains some common landmark types, to ease translation to OpenDRIVE types.  
+*   A __[carla.Waypoint](https://carla.readthedocs.io/en/latest/python_api/#carla.Waypoint)__ can get landmarks located a certain distance ahead of it. The type of landmark can be specified. 
+*   The __[carla.Map](https://carla.readthedocs.io/en/latest/python_api/#carla.Map)__ retrieves sets of landmarks. It can return all the landmarks in the map, or those having an ID, type or group in common.  
+*   The __[carla.World](https://carla.readthedocs.io/en/latest/python_api/#carla.World)__ acts as intermediary between landmarks, and the *carla.TrafficSign* and *carla.TrafficLight* that embody them in the simulation.  
+
+```py
+my_waypoint.get_landmarks(200.0,True)
+``` 
+
 ### Lanes
 
 The lane types defined by [OpenDRIVE standard 1.4](http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf) are translated to the API in [__carla.LaneType__](python_api.md#carla.LaneType) as a series of enum values.  
 
-The lane markings surrounding a lane can be accessed through [__carla.LaneMarking__](python_api.md#carla.LaneMarkingType). These are defined with a series of variables.  
+The lane markings surrounding a lane can be accessed through [__carla.LaneMarking__](python_api.md#carla.LaneMarking). These are defined with a series of variables.  
 
 * [__carla.LaneMarkingType__](python_api.md#carla.LaneMarkingType) are enum values according to OpenDRIVE standards. 
 * [__carla.LaneMarkingColor__](python_api.md#carla.LaneMarkingColor) are enum values to determine the color of the marking. 
@@ -137,7 +155,7 @@ waypoint_list = map.generate_waypoints(2.0)
 waypoint_tuple_list = map.get_topology()
 ```
 
-* __Convert simulation point to geographical coordinates.__ Transforms a certain location to a [carla.Geolocation](python_api.md#carla.Geolocation) with latitude and longitude values. 
+* __Convert simulation point to geographical coordinates.__ Transforms a certain location to a [carla.GeoLocation](python_api.md#carla.GeoLocation) with latitude and longitude values. 
 ```py
 my_geolocation = map.transform_to_geolocation(vehicle.transform)
 ```
@@ -153,7 +171,7 @@ info_map = map.to_opendrive()
 So far there are seven different maps available. Each one has unique features and is useful for different purposes. Hereunder is a brief sum up on them.  
 
 !!! Note
-    Users can [customize a map](tuto_A_map_customization.md) or even [create a new map](tuto_A_map_creation.md) to be used in CARLA.  
+    Users can [customize a map](tuto_A_map_customization.md) or even [create a new map](tuto_A_add_map.md) to be used in CARLA.  
 
 <table class ="defTable">
 <thead>
@@ -186,6 +204,9 @@ So far there are seven different maps available. Each one has unique features an
 <tr>
 <td><b>Town07</b></td>
 <td>A rural environment with narrow roads, barely non traffic lights and barns.</td>
+<tr>
+<td><b>Town10</b></td>
+<td>A city environment with with different environments such as an avenue or a promenade, and more realistic textures.</td>
 </tbody>
 </table>
 <br>
@@ -194,39 +215,45 @@ So far there are seven different maps available. Each one has unique features an
 <div class="townslider-container">
   <!-- Town slide images -->
   <div class="townslide fade">
-  <img src="../img/Town01.png">
+  <img src="../img/Town01.jpg">
     <div class="text">Town01</div>
   </div>
 
   <div class="townslide fade">
-  <img src="../img/Town02.png">
+  <img src="../img/Town02.jpg">
     <div class="text">Town02</div>
   </div>
 
   <div class="townslide fade">
-    <img src="../img/Town03.png">
+    <img src="../img/Town03.jpg">
     <div class="text">Town03</div>
   </div>
 
   <div class="townslide fade">
-    <img src="../img/Town04.png">
+    <img src="../img/Town04.jpg">
     <div class="text">Town04</div>
   </div>
 
   <div class="townslide fade">
-    <img src="../img/Town05.png">
+    <img src="../img/Town05.jpg">
     <div class="text">Town05</div>
   </div>
 
   <div class="townslide fade">
-    <img src="../img/Town06.png">
+    <img src="../img/Town06.jpg">
     <div class="text">Town06</div>
   </div>
 
   <div class="townslide fade">
-    <img src="../img/Town07.png">
+    <img src="../img/Town07.jpg">
     <div class="text">Town07</div>
   </div>
+
+  <div class="townslide fade">
+    <img src="../img/Town10.jpg">
+    <div class="text">Town10</div>
+  </div>
+
 
   <!-- Next and previous buttons -->
   <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
@@ -242,6 +269,7 @@ So far there are seven different maps available. Each one has unique features an
   <span class="dot" onclick="currentSlide(5)"></span>
   <span class="dot" onclick="currentSlide(6)"></span>
   <span class="dot" onclick="currentSlide(7)"></span>
+  <span class="dot" onclick="currentSlide(8)"></span>
 </div> 
 
 <script>

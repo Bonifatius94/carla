@@ -36,13 +36,13 @@ public:
   UTrafficLightController* GetController(FString ControllerId);
 
   UFUNCTION(BlueprintCallable)
-  UTrafficLightComponent* GetTrafficLight(FString SignId);
+  USignComponent* GetTrafficSign(FString SignId);
 
   UFUNCTION(CallInEditor)
-  void GenerateTrafficLights();
+  void GenerateSignalsAndTrafficLights();
 
   UFUNCTION(CallInEditor)
-  void RemoveGeneratedTrafficLights();
+  void RemoveGeneratedSignalsAndTrafficLights();
 
 protected:
   // Called when the game starts or when spawned
@@ -51,6 +51,14 @@ protected:
 private:
 
   void ResetTrafficLightObjects();
+
+  void SpawnTrafficLights();
+
+  void SpawnSignals();
+
+  void RemoveRoadrunnerProps() const;
+
+  void RemoveAttachedProps(TArray<AActor*> Actors) const;
 
   // Cached Carla Game Mode
   UPROPERTY()
@@ -66,13 +74,20 @@ private:
 
   // Mapped references to individual TrafficLightComponents
   UPROPERTY()
-  TMap<FString, UTrafficLightComponent *> TrafficLightComponents;
+  TMap<FString, USignComponent *> TrafficSignComponents;
 
   // Mapped references to TrafficSigns
   TArray<ATrafficSignBase*> TrafficSigns;
 
   UPROPERTY(EditAnywhere, Category= "Traffic Light Manager")
-  TSubclassOf<ATrafficSignBase> TrafficLightModel;
+  TSubclassOf<AActor> TrafficLightModel;
+
+  // Relates an OpenDRIVE type to a traffic sign blueprint
+  UPROPERTY(EditAnywhere, Category= "Traffic Light Manager")
+  TMap<FString, TSubclassOf<AActor>> TrafficSignsModels;
+
+  UPROPERTY(EditAnywhere, Category= "Traffic Light Manager")
+  TMap<FString, TSubclassOf<USignComponent>> SignComponentModels;
 
   UPROPERTY(Category = "Traffic Light Manager", VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
   USceneComponent *SceneComponent;
@@ -81,5 +96,8 @@ private:
 
   UPROPERTY()
   bool TrafficLightsGenerated = false;
+
+  UPROPERTY()
+  int LoneTrafficLightsGroupControllerId = -1;
 
 };

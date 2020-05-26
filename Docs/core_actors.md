@@ -4,18 +4,18 @@ Actors not only include vehicles and walkers, but also sensors, traffic signs, t
 
 This section will cover spawning, destruction, types, and how to manage them. However, the possibilities are almost endless. Experiment, take a look at the __tutorials__ in this documentation and share doubts and ideas in the [CARLA forum](https://forum.carla.org/).  
 
-* [__Blueprints__](#blueprints)  
-	* Managing the blueprint library  
-* [__Actor life cycle__](#actor-life-cycle)  
-	* Spawning  
-	* Handling  
-	* Destruction  
-* [__Types of actors__](#types-of-actors)  
-	* Sensors  
-	* Spectator  
-	* Traffic signs and traffic lights  
-	* Vehicles  
-	* Walkers  
+*   [__Blueprints__](#blueprints)  
+	*   [Managing the blueprint library](#managing-the-blueprint-library)  
+*   [__Actor life cycle__](#actor-life-cycle)  
+	*   [Spawning](#spawning)  
+	*   [Handling](#handling)  
+	*   [Destruction](#destruction)  
+*   [__Types of actors__](#types-of-actors)  
+	*   [Sensors](#sensors)  
+	*   [Spectator](#spectator)  
+	*   [Traffic signs and traffic lights](#traffic-signs-and-traffic-lights)  
+	*   [Vehicles](#vehicles)  
+	*   [Walkers](#walkers)  
 
 ---
 ## Blueprints
@@ -179,7 +179,12 @@ carla.Rotation(pitch=-90)))
 
 ### Traffic signs and traffic lights
 
-So far, CARLA only is aware of some signs: stop, yield and speed limit. Traffic lights are considered an inherited class from the more general traffic sign. __None of these can be found in the blueprint library__ and thus, cannot be spawned. They set traffic conditions, so they are mindfully placed by developers. 
+Only stops, yields and traffic lights are considered actors in CARLA so far. The rest of the OpenDRIVE signs are accessible from the API as [__carla.Landmark__](python_api.md#carla.Landmark). Their information is accessible using these instances, but they do no exist in the simulation as actors. Landmarks are explained more in detail in the following step, __3rd. Maps and navigation__.  
+
+When the simulation starts, stop, yields and traffic light are automatically generated using the information in the OpenDRIVE file. __None of these can be found in the blueprint library__ and thus, cannot be spawned. 
+
+!!! Note
+    CARLA maps do not have traffic signs nor lights in the OpenDRIVE file. These are manually placed by developers.  
 
 [__Traffic signs__](python_api.md#carla.TrafficSign) are not defined in the road map itself, as explained in the following page. Instead, they have a [carla.BoundingBox](python_api.md#carla.BoundingBox) to affect vehicles inside of it.  
 ```py
@@ -187,9 +192,6 @@ So far, CARLA only is aware of some signs: stop, yield and speed limit. Traffic 
 if vehicle_actor.is_at_traffic_light():
     traffic_light = vehicle_actor.get_traffic_light()
 ``` 
-!!! Note
-    Vehicles will only notice a traffic light if the light is red.  
-
 [__Traffic lights__](python_api.md#carla.TrafficLight) are found in junctions. They have their unique ID, as any actor, but also a `group` ID for the junction. To identify the traffic lights in the same group, a `pole` ID is used.  
 
 The traffic lights in the same group follow a cycle. The first one is set to green while the rest remain frozen in red. The active one spends a few seconds in green, yellow and red, so there is a period of time where all the lights are red. Then, the next traffic light starts its cycle, and the previous one is frozen with the rest.  
@@ -202,11 +204,14 @@ if traffic_light.get_state() == carla.TrafficLightState.Red:
     traffic_light.set_set_green_time(4.0)
 ``` 
 
+!!! Note
+    Vehicles will only be aware of a traffic light if the light is red.  
+
 ### Vehicles
 
 [__carla.Vehicle__](python_api.md#carla.Vehicle) are a special type of actor. They are remarkable for having better physics. This is achieved applying four types of different controls.  
 
-* __[carla.VehicleControl](python_api.md#carla.VehiclePhysicsControl)__ provides input for driving commands such as throttle, steering, brake, etc. 
+* __[carla.VehicleControl](python_api.md#carla.VehicleControl)__ provides input for driving commands such as throttle, steering, brake, etc. 
 ```py
 vehicle.apply_control(carla.VehicleControl(throttle=1.0, steer=-1.0))
 ```
@@ -231,24 +236,26 @@ Vehicles include other functionalities unique to them.
 ```py
 vehicle.set_autopilot(True)
 ```
-* __Vehicle lights__ created specifically for each vehicle model. They can be accessed from the API. In order to turn them on/off, the vehicle uses flag values. These are defined in [carla.VehicleLightState](python_api.md#carla.VehicleLightState) and binary operations are used to combine them.
+* __Vehicle lights__ have to be turned on/off by the user. Each vehicle has a set of lights listed in [__carla.VehicleLightState__](python_api.md#carla.VehicleLightState). So far, not all vehicles have lights integrated. Here is a list of those that are available by the time of writing.  
+	*   __Bikes.__ All of them have a front and back position light.  
+	*   __Motorcycles.__ Yamaha and Harley Davidson models.  
+	*   __Cars.__ Audi TT, Chevrolet, Dodge (the police car), Etron, Lincoln, Mustang, Tesla 3S, Wolkswagen T2 and the new guests coming to CARLA.  
+
+The lights of a vehicle can be retrieved and updated anytime using the methods [carla.Vehicle.get_light_state](python_api.md#carla.Vehicle.get_light_state) and [carla.Vehicle.set_light_state](#python_api.md#carla.Vehicle.set_light_state). These use binary operations to customize the light setting.  
 
 ```py
-# Turn on position lights 
+# Turn on position lights
 current_lights = carla.VehicleLightState.NONE
 current_lights |= carla.VehicleLightState.Position
 vehicle.set_light_state(current_lights)
 ```
 
-!!! Note
-    So far, vehicle lights have been implemented only for a specific set of vehicles, listed in the [release post](http://carla.org/2020/03/09/release-0.9.8/#vehicle-lights).  
-
 ### Walkers
 
 [__carla.Walker__](python_api.md#carla.Walker) work in a similar way as vehicles do. Control over them is provided by controllers.  
 
-* [__carla.WalkerControl__](python_api.md#carla.Walker) moves the pedestrian around with a certain direction and speed. It also allows them to jump. 
-* [__carla.WalkerBoneControl__](python_api.md#carla.Walker) provides control over the 3D skeleton. [This tutorial](tuto_G_control_walker_skeletons.md) explains how to control it. 
+* [__carla.WalkerControl__](python_api.md#carla.WalkerControl) moves the pedestrian around with a certain direction and speed. It also allows them to jump. 
+* [__carla.WalkerBoneControl__](python_api.md#carla.WalkerBoneControl) provides control over the 3D skeleton. [This tutorial](tuto_G_control_walker_skeletons.md) explains how to control it. 
 
 Walkers can be AI controlled. They do not have an autopilot mode. The [__carla.WalkerAIController__](python_api.md#carla.WalkerAIController) actor moves around the actor it is attached to.  
 

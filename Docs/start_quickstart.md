@@ -5,6 +5,7 @@
 * __[CARLA installation](#carla-installation)__  
 	* a) deb CARLA installation  
 	* b) GitHub repository installation  
+* __[Import additional assets](#import-addditional-assets)__  
 * __[Running CARLA](#running-carla)__  
 	* Command-line options  
 * __[Updating CARLA](#updating-carla)__  
@@ -22,18 +23,25 @@
 # Install required modules Pygame and Numpy. 
  pip install --user pygame numpy
 
-# Option A) deb package installation of CARLA 0.9.8 (only Linux)
+# Option A) deb package installation of CARLA 0.9.9 (only Linux)
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 92635A407F7A020C
+sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.9/ all main"
+sudo apt-get update
+sudo apt-get install carla-simulator
+cd /opt/carla/bin
+./CarlaUE4.sh
+# To install CARLA  0.9.8 instead
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 304F9BC29914A77D &&
 sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.8/ all main"
 sudo apt-get update
-sudo apt-get install carla
+sudo apt-get install carla-simulator
 cd /opt/carla/bin
 ./CarlaUE4.sh
-# To install CARLA  0.9.7 instead of 0.9.8
+# To install CARLA  0.9.7 instead
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DB53A429E64554FC &&
 sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.7/ all main"
 sudo apt-get update
-sudo apt-get install carla
+sudo apt-get install carla-simulator
 cd /opt/carla/bin
 ./CarlaUE4.sh
 
@@ -62,8 +70,8 @@ The requirements are simpler than those for the build installation.
 
 * __Server side.__ A 4GB minimum GPU will be needed to run a highly realistic environment. A dedicated GPU is highly advised for machine learning.  
 * __Client side.__ [Python](https://www.python.org/downloads/) is necessary to access the API via command line. Also, a good internet connection and two TCP ports (2000 and 2001 by default).  
-* __System requirements.__ Any 64-bits OS should run CARLA.  
-* __Other requirements.__  Two Python modules: [Pygame](https://www.pygame.org/download.shtml) to create graphics directly with Python, and [Numpy](https://pypi.org/project/numpy/) for great calculus.  
+* __System requirements.__ Any 64-bits OS should run CARLA. However, since release 0.9.9, __CARLA cannot run in 16.04 Linux systems with default compilers__. These should be upgraded to work with CARLA.  
+* __Other requirements.__  Two Python modules: [Pygame](https://pypi.org/project/pygame/) to create graphics directly with Python, and [Numpy](https://pypi.org/project/numpy/) for great calculus.  
 
 To install both modules using [pip](https://pip.pypa.io/en/stable/installing/), run the following commands. 
 ```sh
@@ -77,26 +85,16 @@ __Download the GitHub repository__ to get either a specific release or the Windo
 
 ### a) deb CARLA installation
 
-Add the CARLA 0.9.8 repository to the system. 
+Add the CARLA 0.9.9 repository to the system.
 ```sh
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 304F9BC29914A77D &&
-sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.8/ all main"
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 92635A407F7A020C
+sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.9/ all main"
 ```
 Install CARLA and check for the installation in the `/opt/` folder.
 ```sh
 sudo apt-get update
-sudo apt-get install carla
+sudo apt-get install carla-simulator
 cd /opt/carla
-```
-
-The installation of CARLA 0.9.7 instead of 0.9.8 would be quite similar.
-```sh
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DB53A429E64554FC &&
-sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.7/ all main"
-sudo apt-get update
-sudo apt-get install carla
-cd /opt/carla/bin
-./CarlaUE4.sh
 ```
 
 ### b) GitHub repository installation
@@ -110,15 +108,22 @@ cd /opt/carla/bin
 
 The repository contains the different versions of the simulator available. _Development_ and _stable_ sections list the packages for the different official releases. The later the version the more experimental it is. The _nightly build_ is the current development version as today and so, the most unstable.  
 
-There may be many files per release. The package is a compressed file named as __CARLA_version.number__. Other elements such as __Town06_0.9.5.tar.gz__ are additional assets.
+There may be many files per release. The package is a compressed file named as __CARLA_version.number__. Other elements such as __Town06_0.9.5.tar.gz__ are additional maps.
 
-Download and extract the release file. It contains a precompiled version of the simulator, the Python API module and some scripts to be used as examples.  
-Move any additional assets to the _Import_ folder in the release and extract them. The script _ImportAssets_ in the main CARLA folder should extract these automatically.  
+Download and extract the release file. It contains a precompiled version of the simulator, the Python API module and some scripts to be used as examples. 
+
+---
+## Import additional assets 
+
+Additional assets are distributed in CARLA under a compressed package file. For instance, some releases come with [__additional maps__](https://github.com/carla-simulator/carla/blob/master/Docs/download.md) as mentioned previously. In order to use them in CARLA, download and move the package to the _Import_ folder, and run the following script to extract them.  
 
 ```sh
 > cd ~/carla
 > ./ImportAssets.sh
 ```
+
+!!! Note
+    On Windows, directly extract the package on the root folder. 
 
 ---
 ## Running CARLA

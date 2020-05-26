@@ -9,12 +9,12 @@
 	* Install git  
 	* Link GitHub and Unreal Engine 
 * [__Unreal Engine__](#unreal-engine)
-	* Download UE4.22  
-	* Build UE4.22  
+	* Download UE4.24  
+	* Build UE4.24  
 * [__CARLA build__](#carla-build)  
 	* Clone repository  
 	* Get assets  
-	* Set the environment variable 
+	* Set the environment variable  
 	* make CARLA  
 
 The build process can be quite long and tedious. The **[F.A.Q.](build_faq.md)** section contains the most common issues and solutions that appear during the installation. However, the CARLA forum is open for anybody to post unexpected issues, doubts or suggestions. There is a specific section for installation issues on Linux. Feel free to login and become part of the community. 
@@ -40,33 +40,33 @@ sudo apt-get update &&
 sudo apt-get install wget software-properties-common &&
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test &&
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add - &&
-sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" &&
+sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -c --short)/ llvm-toolchain-$(lsb_release -c --short)-8 main" &&
 sudo apt-get update
 
 # Additional dependencies for Ubuntu 18.04.
-sudo apt-get install build-essential clang-7 lld-7 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
+sudo apt-get install build-essential clang-8 lld-8 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
 pip2 install --user setuptools &&
 pip3 install --user setuptools 
 
 # Additional dependencies for previous Ubuntu versions. 
-sudo apt-get install build-essential clang-7 lld-7 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng16-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
+sudo apt-get install build-essential clang-8 lld-8 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng16-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
 pip2 install --user setuptools &&
 pip3 install --user setuptools 
 
 # Change default clang version.
-sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-7/bin/clang++ 170 &&
-sudo update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-7/bin/clang 170
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-8/bin/clang++ 180 &&
+sudo update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-8/bin/clang 180
 
 # Get a GitHub and a UE account, and link both. 
 # Install git. 
 
-# Build Unreal Engine 4.22.
-git clone --depth=1 -b 4.22 https://github.com/EpicGames/UnrealEngine.git ~/UnrealEngine_4.22
-cd ~/UnrealEngine_4.22
+# Build Unreal Engine 4.24.
+git clone --depth=1 -b 4.24 https://github.com/EpicGames/UnrealEngine.git ~/UnrealEngine_4.24
+cd ~/UnrealEngine_4.24
 ./Setup.sh && ./GenerateProjectFiles.sh && make
 
 # Open the UE Editor to check everything works properly.
-cd ~/UnrealEngine_4.22/Engine/Binaries/Linux && ./UE4Editor
+cd ~/UnrealEngine_4.24/Engine/Binaries/Linux && ./UE4Editor
 
 # Clone the CARLA repository. 
 git clone https://github.com/carla-simulator/carla
@@ -76,13 +76,13 @@ cd ~/carla
 ./Update.sh
 
 # Set the environment variable. 
-export UE4_ROOT=~/UnrealEngine_4.22
+export UE4_ROOT=~/UnrealEngine_4.24
 
 # make the CARLA server and the CARLA client. 
 make launch
 make PythonAPI 
 
-# Run an example script to test CARLA. 
+# Press play in the Editor to initialize the server, and run an example script to test CARLA. 
 cd PythonAPI/examples
 python3 spawn_npc.py
 ```
@@ -93,7 +93,7 @@ python3 spawn_npc.py
 
 ### System specifics
 
-* __Ubuntu 16.04 or later.__ Currently migrating to Ubuntu 18.  
+* __Ubuntu 18.04.__ Since release 0.9.9, CARLA cannot run in Ubuntu 16.04 using default compilers.  
 * __30GB disk space.__ Installing all the software needed and CARLA itself will require quite a lot of space, especially Unreal Engine. Make sure to have around 30/50GB of free disk space.  
 * __An adequate GPU.__ CARLA aims for realistic simulations, so the server needs at least a 4GB GPU. A dedicated GPU is highly recommended for machine learning.  
 * __Two TCP ports and good internet connection.__ 2000 and 2001 by default. Be sure neither the firewall nor any other application block these.  
@@ -108,7 +108,7 @@ sudo apt-get update &&
 sudo apt-get install wget software-properties-common &&
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test &&
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add - &&
-sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main" &&
+sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main" &&
 sudo apt-get update
 ```
 
@@ -117,22 +117,22 @@ sudo apt-get update
 
 __Ubuntu 18.04__.
 ```sh
-sudo apt-get install build-essential clang-7 lld-7 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
+sudo apt-get install build-essential clang-8 lld-8 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
 pip2 install --user setuptools &&
 pip3 install --user setuptools 
 ```
 __Previous Ubuntu__ versions. 
 ```sh
-sudo apt-get install build-essential clang-7 lld-7 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng16-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
+sudo apt-get install build-essential clang-8 lld-8 g++-7 cmake ninja-build libvulkan1 python python-pip python-dev python3-dev python3-pip libpng16-dev libtiff5-dev libjpeg-dev tzdata sed curl unzip autoconf libtool rsync libxml2-dev &&
 pip2 install --user setuptools &&
 pip3 install --user setuptools 
 ```
 
-To avoid compatibility issues between Unreal Engine and the CARLA dependencies, it is recommended to use the same compiler version and C++ runtime library to compile everything. The CARLA team uses clang-7 and LLVM's libc++. Change the default clang version to compile Unreal Engine and the CARLA dependencies.
+To avoid compatibility issues between Unreal Engine and the CARLA dependencies, it is recommended to use the same compiler version and C++ runtime library to compile everything. The CARLA team uses clang-8 and LLVM's libc++. Change the default clang version to compile Unreal Engine and the CARLA dependencies.
 
 ```sh
-sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-7/bin/clang++ 170 &&
-sudo update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-7/bin/clang 170
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-8/bin/clang++ 180 &&
+sudo update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-8/bin/clang 180
 ```
 
 ---
@@ -145,18 +145,18 @@ In order to access the Unreal Engine repositories, which are set to private, cre
 ---
 ## Unreal Engine
 
-The current version of CARLA runs on __Unreal Engine 4.22__ only. The path is irrelevant, but for the sake of this tutorial, installation will be done under `~/UnrealEngine_4.22`. If the path chosen differs, remember to change it accordingly when running the commands on terminal.   
+The current version of CARLA runs on __Unreal Engine 4.24__ only. The path is irrelevant, but for the sake of this tutorial, installation will be done under `~/UnrealEngine_4.24`. If the path chosen differs, remember to change it accordingly when running the commands on terminal.   
 
 !!! Note
-    Alternatively, there is this [guide](https://docs.unrealengine.com/en-US/Platforms/Linux/BeginnerLinuxDeveloper/SettingUpAnUnrealWorkflow/index.html) to build UE on Linux. When consulting it, remember that CARLA will need the __4.22 release__, not the latest. 
+    Alternatively, there is this [guide](https://docs.unrealengine.com/en-US/Platforms/Linux/BeginnerLinuxDeveloper/SettingUpAnUnrealWorkflow/index.html) to build UE on Linux. When consulting it, remember that CARLA will need the __4.24 release__, not the latest. 
 
-Clone the content for Unreal Engine 4.22 in a local computer.
+Clone the content for Unreal Engine 4.24 in a local computer.
 ```sh
-git clone --depth=1 -b 4.22 https://github.com/EpicGames/UnrealEngine.git ~/UnrealEngine_4.22
+git clone --depth=1 -b 4.24 https://github.com/EpicGames/UnrealEngine.git ~/UnrealEngine_4.24
 ```
-Get into said folder. Remember, this is the path where UE4.22 has been cloned.
+Get into said folder. Remember, this is the path where UE4.24 has been cloned.
 ```sh
-cd ~/UnrealEngine_4.22
+cd ~/UnrealEngine_4.24
 ```
 Make the build. 
 ```sh
@@ -165,10 +165,10 @@ Make the build.
 
 Unreal Engine should be installed in the system. Run `Engine/Binaries/Linux/UE4Editor.sh` to open the Editor and check it out.
 ```sh
-cd ~/UnrealEngine_4.22/Engine/Binaries/Linux && ./UE4Editor
+cd ~/UnrealEngine_4.24/Engine/Binaries/Linux && ./UE4Editor
 ```
 
-In case something went wrong, it is related with Unreal Engine There is not much CARLA can do about it. However, the [build documentation](https://wiki.unrealengine.com/Building_On_Linux) provided by Unreal Engine may be helpful.
+In case something went wrong, it is related with Unreal Engine There is not much CARLA can do about it. However, the [build documentation](https://github.com/EpicGames/UnrealEngine/blob/release/Engine/Build/BatchFiles/Linux/README.md) provided by Unreal Engine may be helpful.
 
 ---
 ## CARLA build
@@ -177,7 +177,7 @@ The system should be ready to start building CARLA. Just for clarity, a brief su
 * Minimum technical requirements to run CARLA are suitable.  
 * Dependencies have been properly installed.  
 * GitHub account is ready.  
-* Unreal Engine 4.22 runs smooth.  
+* Unreal Engine 4.24 runs smooth.  
 
 !!! Note
     Downloading aria2 with `sudo apt-get install aria2` will speed up the following commands.  
@@ -219,10 +219,10 @@ Run the script to get the assets.
 
 ### Set the environment variable
 
-This is necessary for CARLA to find the Unreal Engine 4.22 installation folder.
+This is necessary for CARLA to find the Unreal Engine 4.24 installation folder.
 
 ```sh
-export UE4_ROOT=~/UnrealEngine_4.22
+export UE4_ROOT=~/UnrealEngine_4.24
 ```
 
 The variable should be added to `~/.bashrc` or `~/.profile` to be set persistently session-wide. Otherwise, it will only be accessible from the current shell.
@@ -232,8 +232,8 @@ The variable should be added to `~/.bashrc` or `~/.profile` to be set persistent
 The last step is to finally build CARLA. There are different `make` commands to build the different modules. All of them run in the root CARLA folder.  
 
 !!! Warning
-    Make sure to run __make launch__ to prepare the server and __make PythonAPI__ for the client.  
-    Alternatively __make libcarla__ will prepare the CARLA library to be imported anywhere. 
+    Make sure to run `make launch` to prepare the server and `make PythonAPI` for the client.  
+    Alternatively `make LibCarla` will prepare the CARLA library to be imported anywhere. 
 
 * __make launch__ compiles the server simulator and launches Unreal Engine. Press **Play** to start the spectator view and close the editor window to exit. Camera can be moved with `WASD` keys and rotated by clicking the scene while moving the mouse around.  
 ```sh

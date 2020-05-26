@@ -6,10 +6,11 @@
 * [__Necessary software__](#necessary-software)  
 	* Minor installations: CMake, git, make, Python3 x64  
 	* Visual Studio 2017
-	* Unreal Engine 4.22 
+	* Unreal Engine 4.24 
 * [__CARLA build__](#carla-build)  
 	* Clone repository  
 	* Get assets  
+	* Set the environment variable  
 	* make CARLA  
 
 The build process can be quite long and tedious. The **[F.A.Q.](build_faq.md)** section contains the most common issues and solutions that appear during the installation. However, the CARLA forum is open for anybody to post unexpected issues, doubts or suggestions. There is a specific section for installation issues on Linux. Feel free to login and become part of the community. 
@@ -35,7 +36,7 @@ CARLA forum</a>
 #   Git
 #   Make
 #   Python3 x64
-#   Unreal Engine 4.22
+#   Unreal Engine 4.24
 #   Visual Studio 2017 with Windows 8.1 SDK and x64 Visual C++ Toolset.
 
 # Set environment variables for the software
@@ -47,7 +48,7 @@ git clone https://github.com/carla-simulator/carla
 make launch
 make PythonAPI
 
-# Run an example script to test CARLA. 
+# Press play in the Editor to initialize the server, and run an example script to test CARLA. 
 cd PythonAPI/Examples && python3 spawn_npc.py
 ```
 </details>
@@ -85,12 +86,12 @@ Get the 2017 version from [here](https://developerinsider.co/download-visual-stu
 !!! Important
     Other Visual Studio versions may cause conflict. Even if these have been uninstalled, some registers may persist. To completely clean Visual Studio from the computer, go to `Program Files (x86)\Microsoft Visual Studio\Installer\resources\app\layout` and run `.\InstallCleanup.exe -full`  
 
-### Unreal Engine 4.22
+### Unreal Engine 4.24
 
-Go to [Unreal Engine](https://www.unrealengine.com/download) and download the _Epic Games Launcher_. In `Engine versions/Library`, download __Unreal Engine 4.22.x__. Make sure to run it in order to check that everything was properly installed.  
+Go to [Unreal Engine](https://www.unrealengine.com/download) and download the _Epic Games Launcher_. In `Engine versions/Library`, download __Unreal Engine 4.24.x__. Make sure to run it in order to check that everything was properly installed.  
 
 !!! Note 
-    Having VS2017 and UE4.22 installed, a __Generate Visual Studio project files__ option should appear when doing right-click on __.uproject__ files. If this is not available, something went wrong whith the UE4.22 installation. Create a UE project to check it out and reinstall if necessary. 
+    Having VS2017 and UE4.24 installed, a __Generate Visual Studio project files__ option should appear when doing right-click on __.uproject__ files. If this is not available, something went wrong whith the UE4.24 installation. Create a UE project to check it out and reinstall if necessary. 
 
 ---
 ## CARLA build
@@ -124,22 +125,22 @@ Only the assets package is yet to be downloaded. `\Util\ContentVersions.txt` con
 
 Download the __latest__ assets to work with the current version of CARLA.
 
-### make CARLA
+### Set the environment variable
 
-Go to the root CARLA folder to make the build. The process may take a while, around 20-40 minutes, it will download and install the necessary libraries. There are different commands to build the different modules.  
+This is necessary for CARLA to find the Unreal Engine installation folder. By doing so, users can choose which specific version of Unreal Engine is to be used. If no environment variable is specified, the CARLA will look up in the directories and use the last version in search order.  
 
-!!! Warning
-    Make sure to run __make launch__ to prepare the server and __make PythonAPI__ for the client.  
-    Alternatively __make libcarla__ will prepare the CARLA library to be imported anywhere. 
-
+__1.   Open the Windows Control Panel__ and go to `Advanced System Settings`.  
+__2.   On the `Advanced` panel__ open `Environment Variables...`.  
+__3.   Click `New...`__ to create the variable.  
+__4.   Name the variable as `UE4_ROOT`__ and choose the path to the installation folder of the desire UE4 installation.  
 
 ### make CARLA
 
 The last step is to finally build CARLA. There are different `make` commands to build the different modules. All of them run in the root CARLA folder.  
 
 !!! Warning
-    Make sure to run __make launch__ to prepare the server and __make PythonAPI__ for the client.  
-    Alternatively __make libcarla__ will prepare the CARLA library to be imported anywhere. 
+    Make sure to run `make launch` to prepare the server and `make PythonAPI` for the client.  
+    Alternatively `make LibCarla` will prepare the CARLA library to be imported anywhere. 
 
 * __make launch__ compiles the server simulator and launches Unreal Engine. Press **Play** to start the spectator view and close the editor window to exit. Camera can be moved with `WASD` keys and rotated by clicking the scene while moving the mouse around.  
 ```sh

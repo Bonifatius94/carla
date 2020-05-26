@@ -73,10 +73,36 @@ public:
     return CarlaEngine.GetServer();
   }
 
+  void SetOpendriveGenerationParameters(
+      const carla::rpc::OpendriveGenerationParameters & Parameters) {
+    GenerationParameters = Parameters;
+  }
+
+  const carla::rpc::OpendriveGenerationParameters&
+      GetOpendriveGenerationParameters() const {
+    return GenerationParameters;
+  }
+
+  void SetMapToLoad(const FString MapName);
+
+  void CheckAndLoadMap(UWorld *world, UCarlaEpisode &Episode);
+
+  bool IsLevelPendingLoad() const {
+    return bShouldLoadLevel;
+  }
+
 private:
 
   UPROPERTY(Category = "CARLA Settings", EditAnywhere)
   UCarlaSettings *CarlaSettings = nullptr;
 
   FCarlaEngine CarlaEngine;
+
+  carla::rpc::OpendriveGenerationParameters GenerationParameters;
+
+  UPROPERTY()
+  bool bShouldLoadLevel = false;
+
+  UPROPERTY()
+  FString MapToLoad;
 };

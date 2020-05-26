@@ -17,6 +17,8 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+#include "Carla/Traffic/TrafficLightManager.h"
+
 ACarlaGameModeBase::ACarlaGameModeBase(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
 {
@@ -62,6 +64,12 @@ void ACarlaGameModeBase::InitGame(
 
   auto World = GetWorld();
   check(World != nullptr);
+
+  AActor* TrafficLightManagerActor =  UGameplayStatics::GetActorOfClass(World, ATrafficLightManager::StaticClass());
+  if(TrafficLightManagerActor == nullptr) {
+    World->SpawnActor<ATrafficLightManager>();
+  }
+
 
   GameInstance = Cast<UCarlaGameInstance>(GetGameInstance());
   checkf(
@@ -133,6 +141,8 @@ void ACarlaGameModeBase::BeginPlay()
   {
     Recorder->GetReplayer()->CheckPlayAfterMapLoaded();
   }
+
+  UCarlaStatics::GetGameInstance(GetWorld())->CheckAndLoadMap(GetWorld(), *Episode);
 }
 
 void ACarlaGameModeBase::Tick(float DeltaSeconds)
@@ -184,12 +194,15 @@ void ACarlaGameModeBase::SpawnActorFactories()
 
 void ACarlaGameModeBase::ParseOpenDrive(const FString &MapName)
 {
-  std::string opendrive_xml = carla::rpc::FromFString(UOpenDrive::LoadXODR(MapName));
-  Map = carla::opendrive::OpenDriveParser::Load(opendrive_xml);
-  if (!Map.has_value()) {
-    UE_LOG(LogCarla, Error, TEXT("Invalid Map"));
-  } else {
-    Episode->MapGeoReference = Map->GetGeoReference();
+  if(!UCarlaStatics::GetGameInstance(Episode->GetWorld())->IsLevelPendingLoad())
+  {
+    std::string opendrive_xml = carla::rpc::FromFString(UOpenDrive::LoadXODR(MapName));
+    Map = carla::opendrive::OpenDriveParser::Load(opendrive_xml);
+    if (!Map.has_value()) {
+      UE_LOG(LogCarla, Error, TEXT("Invalid Map"));
+    } else {
+      Episode->MapGeoReference = Map->GetGeoReference();
+    }
   }
 }
 
