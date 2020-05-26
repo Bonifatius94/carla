@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Computer Vision Center (CVC) at the Universitat Autonoma
+// Copyright (c) 2020 Computer Vision Center (CVC) at the Universitat Autonoma
 // de Barcelona (UAB).
 //
 // This work is licensed under the terms of the MIT license.
@@ -6,19 +6,25 @@
 
 #pragma once
 
+#include "carla/geom/Mesh.h"
 #include "carla/Iterator.h"
 #include "carla/ListView.h"
 #include "carla/NonCopyable.h"
+#include "carla/road/element/Geometry.h"
+#include "carla/road/element/RoadInfo.h"
 #include "carla/road/InformationSet.h"
 #include "carla/road/Junction.h"
 #include "carla/road/LaneSection.h"
 #include "carla/road/LaneSectionMap.h"
 #include "carla/road/RoadElementSet.h"
 #include "carla/road/RoadTypes.h"
+<<<<<<< HEAD
 #include "carla/road/element/Geometry.h"
 #include "carla/road/element/RoadInfo.h"
 #include "carla/road/signal/Signal.h"
 #include "carla/road/signal/SignalReference.h"
+=======
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
 #include <unordered_map>
 #include <vector>
@@ -50,6 +56,11 @@ namespace road {
     Lane &GetLaneByDistance(double s, LaneId lane_id);
 
     const Lane &GetLaneByDistance(double s, LaneId lane_id) const;
+
+    /// Get all lanes from all lane sections in a specific s
+    std::vector<Lane*> GetLanesByDistance(double s);
+
+    std::vector<const Lane*> GetLanesByDistance(double s) const;
 
     RoadId GetSuccessor() const;
 

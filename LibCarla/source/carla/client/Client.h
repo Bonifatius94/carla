@@ -55,6 +55,16 @@ namespace client {
       return World{_simulator->LoadEpisode(std::move(map_name))};
     }
 
+<<<<<<< HEAD
+=======
+    World GenerateOpenDriveWorld(
+        std::string opendrive,
+        const rpc::OpendriveGenerationParameters & params) const {
+      return World{_simulator->LoadOpenDriveEpisode(
+          std::move(opendrive), params)};
+    }
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     /// Return an instance of the world currently active in the simulator.
     World GetWorld() const {
       return World{_simulator->GetCurrentEpisode()};

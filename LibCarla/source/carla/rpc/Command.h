@@ -19,6 +19,13 @@
 #include <boost/variant.hpp>
 
 namespace carla {
+
+namespace traffic_manager {
+  class TrafficManager;
+}
+
+namespace ctm = carla::traffic_manager;
+
 namespace rpc {
 
   class Command {
@@ -136,6 +143,16 @@ namespace rpc {
       MSGPACK_DEFINE_ARRAY(actor, impulse);
     };
 
+    struct ApplyAngularImpulse : CommandBase<ApplyAngularImpulse> {
+      ApplyAngularImpulse() = default;
+      ApplyAngularImpulse(ActorId id, const geom::Vector3D &value)
+        : actor(id),
+          impulse(value) {}
+      ActorId actor;
+      geom::Vector3D impulse;
+      MSGPACK_DEFINE_ARRAY(actor, impulse);
+    };
+
     struct SetSimulatePhysics : CommandBase<SetSimulatePhysics> {
       SetSimulatePhysics() = default;
       SetSimulatePhysics(ActorId id, bool value)
@@ -147,12 +164,19 @@ namespace rpc {
     };
 
     struct SetAutopilot : CommandBase<SetAutopilot> {
+      using TM = traffic_manager::TrafficManager;
+
       SetAutopilot() = default;
-      SetAutopilot(ActorId id, bool value)
+      SetAutopilot(
+          ActorId id,
+          bool value,
+          uint16_t tm_port)
         : actor(id),
-          enabled(value) {}
+          enabled(value),
+          tm_port(tm_port) {}
       ActorId actor;
       bool enabled;
+      uint16_t tm_port;
       MSGPACK_DEFINE_ARRAY(actor, enabled);
     };
 
@@ -167,6 +191,7 @@ namespace rpc {
         ApplyVelocity,
         ApplyAngularVelocity,
         ApplyImpulse,
+        ApplyAngularImpulse,
         SetSimulatePhysics,
         SetAutopilot>;
 

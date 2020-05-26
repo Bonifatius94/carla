@@ -197,6 +197,33 @@ def main():
     elif args.reload_map:
         print('reload map.')
         world = client.reload_world()
+<<<<<<< HEAD
+=======
+    elif args.xodr_path is not None:
+        if os.path.exists(args.xodr_path):
+            with open(args.xodr_path) as od_file:
+                try:
+                    data = od_file.read()
+                except OSError:
+                    print('file could not be readed.')
+                    sys.exit()
+            print('load opendrive map %r.' % os.path.basename(args.xodr_path))
+            vertex_distance = 2.0  # in meters
+            max_road_length = 50.0 # in meters
+            wall_height = 1.0      # in meters
+            extra_width = 0.6      # in meters
+            world = client.generate_opendrive_world(
+                data, carla.OpendriveGenerationParameters(
+                    vertex_distance=vertex_distance,
+                    max_road_length=max_road_length,
+                    wall_height=wall_height,
+                    additional_width=extra_width,
+                    smooth_junctions=True,
+                    enable_mesh_visibility=True))
+        else:
+            print('file not found.')
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     else:
         world = client.get_world()
 

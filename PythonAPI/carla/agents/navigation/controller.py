@@ -23,7 +23,12 @@ class VehiclePIDController():
     low level control a vehicle from client side
     """
 
+<<<<<<< HEAD
     def __init__(self, vehicle, args_lateral=None, args_longitudinal=None):
+=======
+
+    def __init__(self, vehicle, args_lateral, args_longitudinal, max_throttle=0.75, max_brake=0.3, max_steering=0.8):
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
         """
         :param vehicle: actor to apply to local planner logic onto
         :param args_lateral: dictionary of arguments to set the lateral PID controller using the following semantics:
@@ -40,6 +45,10 @@ class VehiclePIDController():
             args_lateral = {'K_P': 1.0, 'K_D': 0.0, 'K_I': 0.0}
         if not args_longitudinal:
             args_longitudinal = {'K_P': 1.0, 'K_D': 0.0, 'K_I': 0.0}
+
+        self.max_brake = max_brake
+        self.max_throt = max_throttle
+        self.max_steer = max_steering
 
         self._vehicle = vehicle
         self._world = self._vehicle.get_world()
@@ -59,6 +68,28 @@ class VehiclePIDController():
         steering = self._lat_controller.run_step(waypoint)
 
         control = carla.VehicleControl()
+<<<<<<< HEAD
+=======
+        if acceleration >= 0.0:
+            control.throttle = min(acceleration, self.max_throt)
+            control.brake = 0.0
+        else:
+            control.throttle = 0.0
+            control.brake = min(abs(acceleration), self.max_brake)
+
+        # Steering regulation: changes cannot happen abruptly, can't steer too much.
+
+        if current_steering > self.past_steering + 0.1:
+            current_steering = self.past_steering + 0.1
+        elif current_steering < self.past_steering - 0.1:
+            current_steering = self.past_steering - 0.1
+
+        if current_steering >= 0:
+            steering = min(self.max_steer, current_steering)
+        else:
+            steering = max(-self.max_steer, current_steering)
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
         control.steer = steering
         control.throttle = throttle
         control.brake = 0.0

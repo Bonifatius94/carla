@@ -118,5 +118,35 @@ namespace geom {
     return {cy * cp, sy * cp, sp};
   }
 
+<<<<<<< HEAD
+=======
+  Vector3D Math::GetRightVector(const Rotation &rotation) {
+    const float cy = std::cos(ToRadians(rotation.yaw));
+    const float sy = std::sin(ToRadians(rotation.yaw));
+    const float cr = std::cos(ToRadians(rotation.roll));
+    const float sr = std::sin(ToRadians(rotation.roll));
+    const float cp = std::cos(ToRadians(rotation.pitch));
+    const float sp = std::sin(ToRadians(rotation.pitch));
+    return {
+         cy * sp * sr - sy * cr,
+         sy * sp * sr + cy * cr,
+        -cp * sr};
+  }
+
+  std::vector<int> Math::GenerateRange(int a, int b) {
+    std::vector<int> result;
+    if (a < b) {
+      for(int i = a; i <= b; ++i) {
+        result.push_back(i);
+      }
+    } else {
+      for(int i = a; i >= b; --i) {
+        result.push_back(i);
+      }
+    }
+    return result;
+  }
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 } // namespace geom
 } // namespace carla

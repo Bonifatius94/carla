@@ -1,12 +1,17 @@
 ---
 - module_name: carla
-  doc: >
+
   # - CLASSES ------------------------------
   classes:
   - class_name: WeatherParameters
     # - DESCRIPTION ------------------------
     doc: >
+<<<<<<< HEAD
       WeatherParameters class is used for requesting and changing the lighting and weather conditions inside the world.
+=======
+      This class defines objects containing lightning and weather specifications that can later be applied in carla.World. So far, these conditions only intervene with [sensor.camera.rgb](ref_sensors.md#rgb-camera). They neither affect the actor's physics nor other sensors.        
+        Each of these parameters acts indepently from the rest. Increasing the rainfall will not automatically create puddles nor change the road's humidity. That makes for a better customization but means that realistic conditions need to be scripted. However an example of dynamic weather conditions working realistically can be found [here](https://github.com/carla-simulator/carla/blob/master/PythonAPI/examples/dynamic_weather.py). 
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     # - PROPERTIES -------------------------
     instance_variables:
     - var_name: cloudiness
@@ -58,9 +63,36 @@
       - param_name: sun_azimuth_angle
         type: float
         default: 0.0
+<<<<<<< HEAD
       - param_name: sun_altitude_angle
         type: float
         default: 0.0
+=======
+        doc: >
+          0 is an arbitrary North, 180 its corresponding South.  
+      - param_name: sun_altitude_angle
+        type: float
+        default: 0.0
+        doc: >
+          90 is midday, -90 is midnight.  
+      - param_name: fog_density
+        type: float
+        default: 0.0
+        doc: >
+          Density of the fog, from 0 to 100.  
+      - param_name: fog_distance
+        type: float
+        default: 0.0
+        doc: >
+          Distance where the fog starts in meters.  
+      - param_name: wetness
+        type: float
+        default: 0.0
+        doc: >
+          Humidity percentages of the road, from 0 to 100.  
+      note: >
+        ClearNoon, CloudyNoon, WetNoon, WetCloudyNoon, SoftRainNoon, MidRainyNoon, HardRainNoon, ClearSunset, CloudySunset, WetSunset, WetCloudySunset, SoftRainSunset, MidRainSunset, HardRainSunset. 
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
       doc: >
         WeatherParameters constructor
     # --------------------------------------
@@ -79,6 +111,9 @@
         Returns True if `self` and `other` are not equal
     # --------------------------------------
     - def_name: __str__
+<<<<<<< HEAD
       doc: > 
+=======
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     # --------------------------------------
 ...

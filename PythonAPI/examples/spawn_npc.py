@@ -67,6 +67,23 @@ def main():
         metavar='PATTERN',
         default='walker.pedestrian.*',
         help='pedestrians filter (default: "walker.pedestrian.*")')
+<<<<<<< HEAD
+=======
+    argparser.add_argument(
+        '--tm-port',
+        metavar='P',
+        default=8000,
+        type=int,
+        help='port to communicate with TM (default: 8000)')
+    argparser.add_argument(
+        '--sync',
+        action='store_true',
+        help='Synchronous mode execution')
+    argparser.add_argument(
+        '--hybrid',
+        action='store_true',
+        help='Enanble')
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     args = argparser.parse_args()
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
@@ -75,11 +92,36 @@ def main():
     walkers_list = []
     all_id = []
     client = carla.Client(args.host, args.port)
+<<<<<<< HEAD
     client.set_timeout(2.0)
+=======
+    client.set_timeout(10.0)
+    synchronous_master = False
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
     try:
-
         world = client.get_world()
+
+<<<<<<< HEAD
+        world = client.get_world()
+=======
+        traffic_manager = client.get_trafficmanager(args.tm_port)
+        traffic_manager.set_global_distance_to_leading_vehicle(2.0)
+        if args.hybrid:
+            traffic_manager.set_hybrid_physics_mode(True)
+
+        if args.sync:
+            settings = world.get_settings()
+            traffic_manager.set_synchronous_mode(True)
+            if not settings.synchronous_mode:
+                synchronous_master = True
+                settings.synchronous_mode = True
+                settings.fixed_delta_seconds = 0.05
+                world.apply_settings(settings)
+            else:
+                synchronous_master = False
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
         blueprints = world.get_blueprint_library().filter(args.filterv)
         blueprintsWalkers = world.get_blueprint_library().filter(args.filterw)
 
@@ -118,7 +160,7 @@ def main():
                 driver_id = random.choice(blueprint.get_attribute('driver_id').recommended_values)
                 blueprint.set_attribute('driver_id', driver_id)
             blueprint.set_attribute('role_name', 'autopilot')
-            batch.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True)))
+            batch.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True, traffic_manager.get_port())))
 
         for response in client.apply_batch_sync(batch):
             if response.error:

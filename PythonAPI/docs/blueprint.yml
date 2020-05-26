@@ -1,6 +1,6 @@
 ---
 - module_name: carla
-  doc: >
+
   # - CLASSES ------------------------------
   classes:
   - class_name: ActorAttributeType
@@ -14,11 +14,16 @@
     - var_name: Int
       doc: >
     - var_name: Float
+<<<<<<< HEAD
       doc: >
     - var_name: String
       doc: >
     - var_name: RGBColor
       doc: >
+=======
+    - var_name: String
+    - var_name: RGBColor
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
   - class_name: Color
     # - DESCRIPTION ------------------------
@@ -90,6 +95,7 @@
     - var_name: id
       type: str
       doc: >
+<<<<<<< HEAD
         The attribute's identifier
     - var_name: type
       type: carla.ActorAttributeType
@@ -103,22 +109,56 @@
       type: bool
       doc: >
         True if the attribute is modifiable.
+=======
+        The attribute's name and identifier in the library. 
+    - var_name: is_modifiable
+      type: bool
+      doc: >
+        It is <b>True</b> if the attribute's value can be modified.
+    - var_name: recommended_values
+      type: list(str)
+      doc: >
+        A list of values suggested by those who designed the blueprint. 
+    - var_name: type
+      type: carla.ActorAttributeType
+      doc: >
+        The attribute's parameter type.
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     # - METHODS ----------------------------
     methods:
     - def_name: as_bool
       doc: >
     # --------------------------------------
+<<<<<<< HEAD
     - def_name: as_int
       doc: >
     # --------------------------------------
+=======
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     - def_name: as_float
       doc: >
     # --------------------------------------
+    - def_name: as_int
+      doc: >
+        Reads the attribute as int. 
+    # --------------------------------------
     - def_name: as_str
       doc: >
+<<<<<<< HEAD
     # --------------------------------------
     - def_name: as_color
       doc: >
+=======
+        Reads the attribute as string. 
+    # --------------------------------------
+    - def_name: __bool__
+    # --------------------------------------
+    - def_name: __float__
+    # --------------------------------------
+    - def_name: __int__
+    # --------------------------------------
+    - def_name: __str__
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     # --------------------------------------
     - def_name: __eq__
       params:
@@ -167,6 +207,19 @@
         List of tags of an actor blueprint e.g. `['0001', 'pedestrian', 'walker']`
     # - METHODS ----------------------------
     methods:
+<<<<<<< HEAD
+=======
+    - def_name: has_attribute
+      return: bool
+      params:
+      - param_name: id
+        type: str
+        doc: >
+          e.g. `gender` would return **True** for pedestrians' blueprints. 
+      doc: >
+        Returns <b>True</b> if the blueprint contains the attribute `id`. 
+    # --------------------------------------
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     - def_name: has_tag
       return: bool
       params:
@@ -229,6 +282,16 @@
     - def_name: __str__
       doc: >
     # --------------------------------------
+    - def_name: __iter__
+      doc: >
+        Allows iteration within this class' attributes. 
+    # --------------------------------------
+    - def_name: __len__
+      doc: >
+        Returns the amount of attributes for this blueprint. 
+    # --------------------------------------
+    - def_name: __str__
+    # --------------------------------------
 
   - class_name: BlueprintLibrary
     # - DESCRIPTION ------------------------
@@ -236,12 +299,33 @@
       Class that provides access to [blueprints](../bp_library/).
     # - METHODS ----------------------------
     methods:
+<<<<<<< HEAD
+    - def_name: find
+=======
+    - def_name: filter
+      params:
+      - param_name: wildcard_pattern
+        type: str
+      doc: >
+        Filters a list of blueprints matching the `wildcard_pattern` against the id and tags of every blueprint contained in this library and returns the result as a new one. Matching follows [fnmatch](https://docs.python.org/2/library/fnmatch.html) standard.
+      return: carla.BlueprintLibrary
+    # --------------------------------------
     - def_name: find
       params:
       - param_name: id
         type: str
       return: carla.ActorBlueprint
       doc: >
+        Returns the blueprint corresponding to that identifier. 
+    # --------------------------------------
+    - def_name: __getitem__
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
+      params:
+      - param_name: id
+        type: str
+      return: carla.ActorBlueprint
+      doc: >
+<<<<<<< HEAD
         Returns a carla.ActorBlueprint through its id
     # --------------------------------------
     - def_name: filter
@@ -271,4 +355,22 @@
     - def_name: __str__
       doc: >
     # --------------------------------------
+=======
+        Returns the blueprint stored in `pos` position inside the data structure containing them. 
+    # --------------------------------------
+    - def_name: __iter__
+      doc: >
+        Method that allows iteration within the blueprints provided. 
+    # --------------------------------------
+    - def_name: __len__
+      return: int 
+      doc: >
+        Returns the amount of blueprints comprising the library. 
+    # --------------------------------------
+    - def_name: __str__
+      return: string 
+      doc: >
+        Parses the identifiers for every blueprint to string. 
+    # --------------------------------------
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 ...

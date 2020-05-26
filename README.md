@@ -97,4 +97,9 @@ CARLA specific code is distributed under MIT License.
 
 CARLA specific assets are distributed under CC-BY License.
 
+<<<<<<< HEAD
+=======
+The ad-rss-lib library compiled and linked by the [RSS Integration build variant](Docs/adv_rss.md) introduces LGPL-2.1-only License.
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 Note that UE4 itself follows its own license terms.

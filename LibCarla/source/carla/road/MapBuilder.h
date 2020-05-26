@@ -334,6 +334,29 @@ namespace road {
     /// Create the pointers between RoadSegments based on the ids.
     void CreatePointersBetweenRoadSegments();
 
+<<<<<<< HEAD
+=======
+    /// Create the bounding boxes of each junction
+    void CreateJunctionBoundingBoxes(Map &map);
+
+    geom::Transform ComputeSignalTransform(std::unique_ptr<Signal> &signal,  MapData &data);
+
+    /// Solves the signal references in the road
+    void SolveSignalReferencesAndTransforms();
+
+    /// Solve the references between Controllers and Juntions
+    void SolveControllerAndJuntionReferences();
+
+    /// Compute the conflicts of the roads (intersecting roads)
+    void ComputeJunctionRoadConflicts(Map &map);
+
+    /// Generates a default validity field for signal references with missing validity record in OpenDRIVE
+    void GenerateDefaultValiditiesForSignalReferences();
+
+    /// Checks signals overlapping driving lanes and emits a warning
+    void CheckSignalsOnRoads(Map &map);
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     /// Return the pointer to a lane object.
     Lane *GetEdgeLanePointer(RoadId road_id, bool from_start, LaneId lane_id);
 

@@ -12,8 +12,15 @@
 #include "carla/rpc/TrafficLightState.h"
 
 namespace carla {
+
+using TM = traffic_manager::TrafficManager;
+
 namespace client {
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   template <typename AttributesT>
   static bool GetControlIsSticky(const AttributesT &attributes) {
     for (auto &&attribute : attributes) {
@@ -28,8 +35,18 @@ namespace client {
     : Actor(std::move(init)),
       _is_control_sticky(GetControlIsSticky(GetAttributes())) {}
 
+<<<<<<< HEAD
   void Vehicle::SetAutopilot(bool enabled) {
     GetEpisode().Lock()->SetVehicleAutopilot(*this, enabled);
+=======
+  void Vehicle::SetAutopilot(bool enabled, uint16_t tm_port) {
+    TM tm(GetEpisode(), tm_port);
+    if (enabled) {
+      tm.RegisterVehicles({shared_from_this()});
+    } else {
+      tm.UnregisterVehicles({shared_from_this()});
+    }
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
   }
 
   void Vehicle::ApplyControl(const Control &control) {

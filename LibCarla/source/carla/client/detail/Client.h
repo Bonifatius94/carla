@@ -17,10 +17,12 @@
 #include "carla/rpc/CommandResponse.h"
 #include "carla/rpc/EpisodeInfo.h"
 #include "carla/rpc/EpisodeSettings.h"
+#include "carla/rpc/LightState.h"
 #include "carla/rpc/MapInfo.h"
 #include "carla/rpc/TrafficLightState.h"
 #include "carla/rpc/VehiclePhysicsControl.h"
 #include "carla/rpc/WeatherParameters.h"
+#include "carla/rpc/OpendriveGenerationParameters.h"
 
 #include <functional>
 #include <memory>
@@ -74,6 +76,14 @@ namespace detail {
 
     void LoadEpisode(std::string map_name);
 
+<<<<<<< HEAD
+=======
+    bool CheckIntermediateEpisode();
+
+    void CopyOpenDriveToServer(
+        std::string opendrive, const rpc::OpendriveGenerationParameters & params);
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     rpc::EpisodeInfo GetEpisodeInfo();
 
     rpc::MapInfo GetMapInfo();
@@ -96,13 +106,24 @@ namespace detail {
 
     std::vector<rpc::Actor> GetActorsById(const std::vector<ActorId> &ids);
 
-    rpc::VehiclePhysicsControl GetVehiclePhysicsControl(
-        const rpc::ActorId &vehicle) const;
+    rpc::VehiclePhysicsControl GetVehiclePhysicsControl(rpc::ActorId vehicle) const;
 
+<<<<<<< HEAD
+=======
+    rpc::VehicleLightState GetVehicleLightState(rpc::ActorId vehicle) const;
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     void ApplyPhysicsControlToVehicle(
-        const rpc::ActorId &vehicle,
+        rpc::ActorId vehicle,
         const rpc::VehiclePhysicsControl &physics_control);
 
+<<<<<<< HEAD
+=======
+    void SetLightStateToVehicle(
+        rpc::ActorId vehicle,
+        const rpc::VehicleLightState &light_state);
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
     rpc::Actor SpawnActor(
         const rpc::ActorDescription &description,
         const geom::Transform &transform);
@@ -132,6 +153,10 @@ namespace detail {
         const geom::Vector3D &vector);
 
     void AddActorImpulse(
+        rpc::ActorId actor,
+        const geom::Vector3D &vector);
+
+    void AddActorAngularImpulse(
         rpc::ActorId actor,
         const geom::Vector3D &vector);
 
@@ -180,7 +205,7 @@ namespace detail {
         bool freeze);
 
     std::vector<ActorId> GetGroupTrafficLights(
-        const rpc::ActorId &traffic_light);
+        rpc::ActorId traffic_light);
 
     std::string StartRecorder(std::string name);
 
@@ -213,6 +238,12 @@ namespace detail {
         bool do_tick_cue);
 
     uint64_t SendTickCue();
+
+    std::vector<rpc::LightState> QueryLightsStateToServer() const;
+
+    void UpdateServerLightsState(
+        std::vector<rpc::LightState>& lights,
+        bool discard_client = false) const;
 
   private:
 

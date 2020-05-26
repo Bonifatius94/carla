@@ -56,10 +56,47 @@ namespace detail {
 
         auto next = std::make_shared<const EpisodeState>(CastData(*data));
         auto prev = self->GetState();
+<<<<<<< HEAD
         do {
           if (prev->GetFrame() >= next->GetFrame()) {
             self->_on_tick_callbacks.Call(next);
             return;
+=======
+
+        // TODO: Update how the map change is detected
+        // bool HasMapChanged = next->HasMapChanged();
+        bool UpdateLights = next->IsLightUpdatePending();
+
+        /// Check for pending exceptions (Mainly TM server closed)
+        if(self->_pending_exceptions) {
+
+          /// Mark pending exception false
+          self->_pending_exceptions = false;
+
+          /// Create exception for the error message
+          auto exception(self->_pending_exceptions_msg);
+          // Notify waiting threads that exception occurred
+          self->_snapshot.SetException(std::runtime_error(exception));
+        }
+        /// Sensor case: inconsistent data
+        else {
+          bool episode_changed = (next->GetEpisodeId() != prev->GetEpisodeId());
+
+          do {
+            if (prev->GetFrame() >= next->GetFrame()) {
+              self->_on_tick_callbacks.Call(next);
+              return;
+            }
+          } while (!self->_state.compare_exchange(&prev, next));
+
+          if(UpdateLights) {
+            self->_on_light_update_callbacks.Call(next);
+          }
+
+          /// Episode change
+          if(episode_changed) {
+            self->OnEpisodeChanged();
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
           }
         } while (!self->_state.compare_exchange(&prev, next));
 

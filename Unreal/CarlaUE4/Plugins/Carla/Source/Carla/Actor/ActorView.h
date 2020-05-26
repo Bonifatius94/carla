@@ -24,6 +24,7 @@ public:
     Walker,
     Scoomatic,
     TrafficLight,
+    TrafficSign,
     INVALID
   };
 

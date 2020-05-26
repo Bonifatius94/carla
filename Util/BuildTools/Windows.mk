@@ -11,20 +11,36 @@ export INSTALLATION_DIR=$(ROOT_PATH)Build/
 help:
 	@type "${CARLA_BUILD_TOOLS_FOLDER}\Windows.mk.help"
 
+<<<<<<< HEAD
 launch: LibCarla
+=======
+# use PHONY to force next line as command and avoid conflict with folders of the same name
+.PHONY: import
+import: server
+	@"${CARLA_BUILD_TOOLS_FOLDER}/Import.py" $(ARGS)
+
+CarlaUE4Editor: LibCarla
+	@"${CARLA_BUILD_TOOLS_FOLDER}/BuildCarlaUE4.bat" --build
+
+launch: CarlaUE4Editor
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 	@"${CARLA_BUILD_TOOLS_FOLDER}/BuildCarlaUE4.bat" --launch
 
 package: PythonAPI
-	@"${CARLA_BUILD_TOOLS_FOLDER}/Package.bat" --ue-version 4.22
+	@"${CARLA_BUILD_TOOLS_FOLDER}/Package.bat" --ue-version 4.24 $(ARGS)
 
+.PHONY: docs
 docs:
 	@doxygen
 	@echo "Documentation index at ./Doxygen/html/index.html"
 
-clean:
-	@"${CARLA_BUILD_TOOLS_FOLDER}/Package.bat" --clean --ue-version 4.22
-	@"${CARLA_BUILD_TOOLS_FOLDER}/BuildCarlaUE4.bat" --clean
+PythonAPI.docs:
+	python PythonAPI/docs/doc_gen.py
+	cd PythonAPI/docs && python bp_doc_gen.py
 
+clean:
+	@"${CARLA_BUILD_TOOLS_FOLDER}/Package.bat" --clean --ue-version 4.24
+	@"${CARLA_BUILD_TOOLS_FOLDER}/BuildCarlaUE4.bat" --clean
 	@"${CARLA_BUILD_TOOLS_FOLDER}/BuildPythonAPI.bat" --clean
 	@"${CARLA_BUILD_TOOLS_FOLDER}/BuildLibCarla.bat" --clean
 

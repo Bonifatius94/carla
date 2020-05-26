@@ -185,6 +185,7 @@ def run_benchmark(world, sensor_specs_list, number_locations, number_ticks, acto
     spawn_points = world.get_map().get_spawn_points()
     n = min(number_locations, len(spawn_points))
 
+<<<<<<< HEAD
     ego_vehicle = None
     list_fps = []
     sensor_list = None
@@ -194,6 +195,13 @@ def run_benchmark(world, sensor_specs_list, number_locations, number_ticks, acto
         if sensors:
             sensor_list = sensors
         ego_vehicle.set_autopilot(True)
+=======
+  ticks = 0
+  while ticks < int(args.ticks):
+    _ = world.wait_for_tick()
+    if debug:
+      print("== Samples {} / {}".format(ticks + 1, args.ticks))
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd
 
         ticks = 0
         while ticks < number_ticks:

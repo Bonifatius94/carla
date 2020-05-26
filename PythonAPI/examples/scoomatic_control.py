@@ -14,9 +14,20 @@ Welcome to CARLA scoomatic control.
 
 Use A or D key for control.
 
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
     A            : left velocity
     D            : right velocity
     
+=======
+    W            : throttle
+    S            : brake
+    AD           : steer
+    Q            : toggle reverse
+    Space        : hand-brake
+    P            : toggle autopilot
+    M            : toggle manual transmission
+    ,/.          : gear up/down
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
 
     TAB          : change sensor position
     `            : next sensor
@@ -24,6 +35,11 @@ Use A or D key for control.
     C            : change weather (Shift+C reverse)
 
     R            : toggle recording images to disk
+
+    F2           : toggle RSS visualization mode
+    B            : toggle RSS Road Boundaries Mode
+    G            : RSS check drop current route
+    T            : toggle RSS parameters
 
     CTRL + R     : toggle recording of simulation (replacing any previous)
     CTRL + P     : start replaying last recorded simulation
@@ -86,6 +102,7 @@ try:
     from pygame.locals import K_DOWN
     from pygame.locals import K_ESCAPE
     from pygame.locals import K_F1
+    from pygame.locals import K_F2
     from pygame.locals import K_LEFT
     from pygame.locals import K_PERIOD
     from pygame.locals import K_RIGHT
@@ -94,8 +111,10 @@ try:
     from pygame.locals import K_TAB
     from pygame.locals import K_UP
     from pygame.locals import K_a
+    from pygame.locals import K_b
     from pygame.locals import K_c
     from pygame.locals import K_d
+    from pygame.locals import K_g
     from pygame.locals import K_h
     from pygame.locals import K_m
     from pygame.locals import K_p
@@ -137,6 +156,7 @@ def get_actor_display_name(actor, truncate=250):
 
 
 class World(object):
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
     def __init__(self, carla_world, hud, args):
         self.world = carla_world
         self.actor_role_name = args.rolename
@@ -147,6 +167,14 @@ class World(object):
             print('  The server could not send the OpenDRIVE (.xodr) file:')
             print('  Make sure it exists, has the same name of your town, and is correct.')
             sys.exit(1)
+=======
+
+    def __init__(self, carla_world, hud, actor_filter, actor_role_name='hero', external_actor=False):
+        self.world = carla_world
+        self.actor_role_name = actor_role_name
+        self.external_actor = external_actor
+        self.map = self.world.get_map()
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
         self.hud = hud
         self.player = None
         self.collision_sensor = None
@@ -166,6 +194,7 @@ class World(object):
         # Keep same camera config if the camera manager exists.
         cam_index = self.camera_manager.index if self.camera_manager is not None else 0
         cam_pos_index = self.camera_manager.transform_index if self.camera_manager is not None else 0
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
         # Get the scoomatic blueprint
         blueprint = self.world.get_blueprint_library().find(self._actor_filter)
 	blueprint.set_attribute('role_name', self.actor_role_name)
@@ -194,6 +223,50 @@ class World(object):
             spawn_point = random.choice(spawn_points) if spawn_points else carla.Transform()
 	    spawn_point.location.z -= 1.5
 	    self.player = self.world.try_spawn_actor(blueprint, spawn_point)
+=======
+
+        if self.external_actor:
+            # Check whether there is already an actor with defined role name
+            for actor in self.world.get_actors():
+                if actor.attributes.get('role_name') == self.actor_role_name:
+                    self.player = actor
+                    break
+        else:
+            # Get a random blueprint.
+            blueprint = random.choice(self.world.get_blueprint_library().filter(self._actor_filter))
+            blueprint.set_attribute('role_name', self.actor_role_name)
+            if blueprint.has_attribute('color'):
+                color = random.choice(blueprint.get_attribute('color').recommended_values)
+                blueprint.set_attribute('color', color)
+            if blueprint.has_attribute('driver_id'):
+                driver_id = random.choice(blueprint.get_attribute('driver_id').recommended_values)
+                blueprint.set_attribute('driver_id', driver_id)
+            if blueprint.has_attribute('is_invincible'):
+                blueprint.set_attribute('is_invincible', 'true')
+            # Spawn the player.
+            if self.player is not None:
+                spawn_point = self.player.get_transform()
+                spawn_point.location.z += 2.0
+                spawn_point.rotation.roll = 0.0
+                spawn_point.rotation.pitch = 0.0
+                self.destroy()
+                self.player = self.world.try_spawn_actor(blueprint, spawn_point)
+            while self.player is None:
+                spawn_points = self.map.get_spawn_points()
+                spawn_point = random.choice(spawn_points) if spawn_points else carla.Transform()
+                self.player = self.world.try_spawn_actor(blueprint, spawn_point)
+
+        if self.external_actor:
+            ego_sensors = []
+            for actor in self.world.get_actors():
+                if actor.parent == self.player:
+                    ego_sensors.append(actor)
+
+            for ego_sensor in ego_sensors:
+                if ego_sensor is not None:
+                    ego_sensor.destroy()
+
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
         # Set up the sensors.
         self.collision_sensor = CollisionSensor(self.player, self.hud)
         #self.lane_invasion_sensor = LaneInvasionSensor(self.player, self.hud)
@@ -240,11 +313,27 @@ class World(object):
 
 
 class KeyboardControl(object):
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
     def __init__(self, world, start_in_autopilot):
         self._autopilot_enabled = start_in_autopilot
         if isinstance(world.player, carla.Scoomatic):
 	    self._control = carla.ScoomaticControl()
 	    self._autopilot_enabled = False
+=======
+
+    def __init__(self, world, args):
+        self._autopilot_enabled = args.autopilot
+        self._world = world
+        self._restrictor = None
+        if isinstance(world.player, carla.Vehicle):
+            self._control = carla.VehicleControl()
+            world.player.set_autopilot(self._autopilot_enabled)
+            self._restrictor = carla.RssRestrictor()
+        elif isinstance(world.player, carla.Walker):
+            self._control = carla.WalkerControl()
+            self._autopilot_enabled = False
+            self._rotation = world.player.get_transform().rotation
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
         else:
             raise NotImplementedError("Actor type not supported")
         self._steer_cache = 0.0
@@ -310,6 +399,30 @@ class KeyboardControl(object):
                     else:
                         world.recording_start += 1
                     world.hud.notification("Recording start time is %d" % (world.recording_start))
+                elif event.key == K_F2:
+                    if self._world and self._world.rss_sensor:
+                        visualization_mode = self._world.rss_sensor.sensor.visualization_mode
+                        visualization_mode = visualization_mode + 1
+                        if visualization_mode > carla.RssVisualizationMode.All:
+                            visualization_mode = carla.RssVisualizationMode.Off
+                        self._world.rss_sensor.sensor.visualization_mode = carla.RssVisualizationMode(visualization_mode)
+                elif event.key == K_b:
+                    if self._world and self._world.rss_sensor:
+                        if self._world.rss_sensor.sensor.road_boundaries_mode == carla.RssRoadBoundariesMode.Off:
+                            self._world.rss_sensor.sensor.road_boundaries_mode = carla.RssRoadBoundariesMode.On
+                            print("carla.RssRoadBoundariesMode.On")
+                        else:
+                            self._world.rss_sensor.sensor.road_boundaries_mode = carla.RssRoadBoundariesMode.Off
+                            print("carla.RssRoadBoundariesMode.Off")
+                elif event.key == K_g:
+                    if self._world and self._world.rss_sensor:
+                        self._world.rss_sensor.drop_route()
+                elif event.key == K_t:
+                    if self._world and self._world.rss_sensor:
+                        if self._world.rss_sensor.assertive_parameters:
+                            self._world.rss_sensor.set_default_parameters()
+                        else:
+                            self._world.rss_sensor.set_assertive_parameters()
                 if isinstance(self._control, carla.VehicleControl):
                     if event.key == K_q:
                         self._control.gear = 1 if self._control.reverse else -1
@@ -327,6 +440,7 @@ class KeyboardControl(object):
                         world.player.set_autopilot(self._autopilot_enabled)
                         world.hud.notification('Autopilot %s' % ('On' if self._autopilot_enabled else 'Off'))
         if not self._autopilot_enabled:
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
            if isinstance(self._control, carla.ScoomaticControl):
 		self._parse_scoomatic_keys(pygame.key.get_pressed(), clock.get_time())
            world.player.apply_control(self._control)
@@ -340,6 +454,71 @@ class KeyboardControl(object):
 	   self._control.right_velocity = 2000
 	else:
 	   self._control.right_velocity = 0
+=======
+            if isinstance(self._control, carla.VehicleControl):
+                prev_steer_cache = self._steer_cache
+                self._parse_vehicle_keys(pygame.key.get_pressed(), clock.get_time())
+                self._control.reverse = self._control.gear < 0
+                vehicle_control = self._control
+                world.hud.original_vehicle_control = vehicle_control
+                world.hud.restricted_vehicle_control = vehicle_control
+
+                # limit speed to 30kmh
+                v = self._world.player.get_velocity()
+                if (3.6 * math.sqrt(v.x**2 + v.y**2 + v.z**2)) > 30.0:
+                    self._control.throttle = 0
+
+                # if self._world.rss_sensor and self._world.rss_sensor.ego_dynamics_on_route and not self._world.rss_sensor.ego_dynamics_on_route.ego_center_within_route:
+                #    print ("Not on route!" +  str(self._world.rss_sensor.ego_dynamics_on_route))
+                if self._restrictor:
+                    rss_restriction = self._world.rss_sensor.acceleration_restriction if self._world.rss_sensor and self._world.rss_sensor.response_valid else None
+                    if rss_restriction:
+                        rss_ego_dynamics_on_route = self._world.rss_sensor.ego_dynamics_on_route
+                        vehicle_physics = world.player.get_physics_control()
+
+                        if not (pygame.key.get_mods() & KMOD_CTRL):
+                            vehicle_control = self._restrictor.restrict_vehicle_control(
+                                vehicle_control, rss_restriction, rss_ego_dynamics_on_route, vehicle_physics)
+                        world.hud.restricted_vehicle_control = vehicle_control
+                        if world.hud.original_vehicle_control.steer != world.hud.restricted_vehicle_control.steer:
+                            self._steer_cache = prev_steer_cache
+
+                world.player.apply_control(vehicle_control)
+
+            elif isinstance(self._control, carla.WalkerControl):
+                self._parse_walker_keys(pygame.key.get_pressed(), clock.get_time())
+                world.player.apply_control(self._control)
+
+    def _parse_vehicle_keys(self, keys, milliseconds):
+        self._control.throttle = 1.0 if keys[K_UP] or keys[K_w] else 0.0
+        steer_increment = 5e-4 * milliseconds
+        if keys[K_LEFT] or keys[K_a]:
+            self._steer_cache -= steer_increment
+        elif keys[K_RIGHT] or keys[K_d]:
+            self._steer_cache += steer_increment
+        else:
+            self._steer_cache = 0.0
+        self._steer_cache = min(0.7, max(-0.7, self._steer_cache))
+        self._control.steer = round(self._steer_cache, 1)
+        self._control.brake = 1.0 if keys[K_DOWN] or keys[K_s] else 0.0
+        self._control.hand_brake = keys[K_SPACE]
+
+    def _parse_walker_keys(self, keys, milliseconds):
+        self._control.speed = 0.0
+        if keys[K_DOWN] or keys[K_s]:
+            self._control.speed = 0.0
+        if keys[K_LEFT] or keys[K_a]:
+            self._control.speed = .01
+            self._rotation.yaw -= 0.08 * milliseconds
+        if keys[K_RIGHT] or keys[K_d]:
+            self._control.speed = .01
+            self._rotation.yaw += 0.08 * milliseconds
+        if keys[K_UP] or keys[K_w]:
+            self._control.speed = 3.333 if pygame.key.get_mods() & KMOD_SHIFT else 2.778
+        self._control.jump = keys[K_SPACE]
+        self._rotation.yaw = round(self._rotation.yaw, 1)
+        self._control.direction = self._rotation.get_forward_vector()
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
 
     @staticmethod
     def _is_quit_shortcut(key):
@@ -352,6 +531,7 @@ class KeyboardControl(object):
 
 
 class HUD(object):
+
     def __init__(self, width, height):
         self.dim = (width, height)
         font = pygame.font.Font(pygame.font.get_default_font(), 20)
@@ -465,8 +645,13 @@ class HUD(object):
                             rect = pygame.Rect((bar_h_offset, v_offset + 8), (f * bar_width, 6))
                         pygame.draw.rect(display, (255, 255, 255), rect)
                     item = item[0]
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
                 if item:  # At this point has to be a str.
                     surface = self._font_mono.render(item, True, (255, 255, 255))
+=======
+                if item and len(item) > 0:   # At this point has to be a str.
+                    surface = self._font_mono.render(item, True, text_color)
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
                     display.blit(surface, (8, v_offset))
                 v_offset += 18
         self._notifications.render(display)
@@ -479,6 +664,7 @@ class HUD(object):
 
 
 class FadingText(object):
+
     def __init__(self, font, dim, pos):
         self.font = font
         self.dim = dim
@@ -508,6 +694,7 @@ class FadingText(object):
 
 
 class HelpText(object):
+
     def __init__(self, font, width, height):
         lines = __doc__.split('\n')
         self.font = font
@@ -536,6 +723,7 @@ class HelpText(object):
 
 
 class CollisionSensor(object):
+
     def __init__(self, parent_actor, hud):
         self.sensor = None
         self.history = []
@@ -575,6 +763,7 @@ class CollisionSensor(object):
 
 
 class LaneInvasionSensor(object):
+
     def __init__(self, parent_actor, hud):
         self.sensor = None
         self._parent = parent_actor
@@ -602,6 +791,7 @@ class LaneInvasionSensor(object):
 
 
 class GnssSensor(object):
+
     def __init__(self, parent_actor):
         self.sensor = None
         self._parent = parent_actor
@@ -623,6 +813,110 @@ class GnssSensor(object):
         self.lat = event.latitude
         self.lon = event.longitude
 
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
+=======
+# ==============================================================================
+# -- RssSensor --------------------------------------------------------
+# ==============================================================================
+
+
+class RssSensor(object):
+
+    def __init__(self, parent_actor, routing_targets=None):
+        self.sensor = None
+        self._parent = parent_actor
+        self.timestamp = None
+        self.response_valid = False
+        self.proper_response = None
+        self.acceleration_restriction = None
+        self.ego_dynamics_on_route = None
+        self.current_display_parameters = None  # for display
+        self.assertive_parameters = False
+        world = self._parent.get_world()
+        bp = world.get_blueprint_library().find('sensor.other.rss')
+        self.sensor = world.spawn_actor(bp, carla.Transform(carla.Location(x=0.0, z=0.0)), attach_to=self._parent)
+        # We need to pass the lambda a weak reference to self to avoid circular
+        # reference.
+
+        def check_rss_class(clazz):
+            return inspect.isclass(clazz) and "RssSensor" in clazz.__name__
+
+        if not inspect.getmembers(carla, check_rss_class):
+            raise RuntimeError('CARLA PythonAPI not compiled in RSS variant, please "make PythonAPI.rss"')
+        weak_self = weakref.ref(self)
+        self.sensor.listen(lambda event: RssSensor._on_rss_response(weak_self, event))
+        self.sensor.visualization_mode = carla.RssVisualizationMode.All
+        self.sensor.visualize_results = True
+        self.sensor.road_boundaries_mode = carla.RssRoadBoundariesMode.On
+        self.set_default_parameters()
+        self.sensor.reset_routing_targets()
+        if routing_targets:
+            for target in routing_targets:
+                self.sensor.append_routing_target(target)
+
+    def get_assertive_parameters(self):
+        ego_dynamics = self.sensor.ego_vehicle_dynamics
+        ego_dynamics.alphaLon.accelMax = 4.1
+        ego_dynamics.alphaLon.brakeMin = -4.64
+        ego_dynamics.alphaLon.brakeMinCorrect = -1.76
+        ego_dynamics.alphaLon.brakeMax = -8.03
+        ego_dynamics.alphaLat.brakeMin = -0.96
+        ego_dynamics.alphaLat.accelMax = 0.43
+        ego_dynamics.lateralFluctuationMargin = 0.07
+        ego_dynamics.responseTime = 0.53
+        ego_dynamics.maxSpeed = 100
+        return ego_dynamics
+
+    def set_assertive_parameters(self):
+        print("Use 'assertive' Ego RSS Parameters")
+        ego_dynamics = self.get_assertive_parameters()
+        self.assertive_parameters = True
+        self.sensor.ego_vehicle_dynamics = ego_dynamics
+        self.current_display_parameters = ego_dynamics
+
+    def get_default_parameters(self):
+        ego_dynamics = self.sensor.ego_vehicle_dynamics
+        # default, from ad_rss documentation
+        ego_dynamics.alphaLon.accelMax = 3.5
+        ego_dynamics.alphaLon.brakeMin = -4
+        ego_dynamics.alphaLon.brakeMax = -8
+        ego_dynamics.alphaLon.brakeMinCorrect = -3
+        ego_dynamics.alphaLat.brakeMin = -0.8
+        ego_dynamics.alphaLat.accelMax = 0.2
+        ego_dynamics.lateralFluctuationMargin = 0.1
+        ego_dynamics.responseTime = 1.0
+        ego_dynamics.maxSpeed = 100
+        return ego_dynamics
+
+    def set_default_parameters(self):
+        print("Use 'default' Ego RSS Parameters")
+        ego_dynamics = self.get_default_parameters()
+        self.assertive_parameters = False
+        self.sensor.ego_vehicle_dynamics = ego_dynamics
+        self.current_display_parameters = ego_dynamics
+
+    @staticmethod
+    def _on_rss_response(weak_self, response):
+        self = weak_self()
+        if not self or not response:
+            return
+        delta_time = 0.1
+        if self.timestamp:
+            delta_time = response.timestamp - self.timestamp
+        # debug drawing within the RssSensor takes quite some time
+        # while debug drawing is blocking a thread the respective response usually arrives later
+        if delta_time > -0.05:
+            self.timestamp = response.timestamp
+            self.response_valid = response.response_valid
+            self.proper_response = response.proper_response
+            self.acceleration_restriction = response.acceleration_restriction
+            self.ego_dynamics_on_route = response.ego_dynamics_on_route
+        # else:
+        #     print("ignore outdated response {}".format(delta_time))
+
+    def drop_route(self):
+        self.sensor.drop_route()
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
 
 # ==============================================================================
 # -- CameraManager -------------------------------------------------------------
@@ -630,7 +924,12 @@ class GnssSensor(object):
 
 
 class CameraManager(object):
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
     def __init__(self, parent_actor, hud, gamma_correction):
+=======
+
+    def __init__(self, parent_actor, hud):
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
         self.sensor = None
         self.surface = None
         self._parent = parent_actor
@@ -726,7 +1025,7 @@ class CameraManager(object):
             lidar_data = lidar_data.astype(np.int32)
             lidar_data = np.reshape(lidar_data, (-1, 2))
             lidar_img_size = (self.hud.dim[0], self.hud.dim[1], 3)
-            lidar_img = np.zeros((lidar_img_size), dtype = int)
+            lidar_img = np.zeros((lidar_img_size), dtype=int)
             lidar_img[tuple(lidar_data.T)] = (255, 255, 255)
             self.surface = pygame.surfarray.make_surface(lidar_img)
         else:
@@ -759,10 +1058,16 @@ def game_loop(args):
             pygame.HWSURFACE | pygame.DOUBLEBUF)
 
         hud = HUD(args.width, args.height)
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
         world = World(client.get_world(), hud, args)
         controller = KeyboardControl(world, args.autopilot)
+=======
+        world = World(client.get_world(), hud, args.filter, args.rolename, args.externalActor)
+        controller = KeyboardControl(world, args)
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
 
         clock = pygame.time.Clock()
+        carla.VehicleLightState=None
         while True:
             clock.tick_busy_loop(60)
             if controller.parse_events(client, world, clock):
@@ -826,10 +1131,16 @@ def main():
         default='hero',
         help='actor role name (default: "hero")')
     argparser.add_argument(
+<<<<<<< HEAD:PythonAPI/examples/scoomatic_control.py
         '--gamma',
         default=2.2,
         type=float,
         help='Gamma correction of the camera (default: 2.2)')
+=======
+        '--externalActor',
+        action='store_true',
+        help='attaches to externally created actor by role name')
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:PythonAPI/examples/manual_control_rss.py
     args = argparser.parse_args()
 
     args.width, args.height = [int(x) for x in args.res.split('x')]

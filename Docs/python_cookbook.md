@@ -140,7 +140,7 @@ print("R lane marking change: " + str(waypoint.right_lane_marking.lane_change))
 # ...
 ```
 
-![lane_marking_recipe](img/lane_marking_recipe.png)
+![lane_marking_recipe](img/recipe_lane_marking.jpg)
 
 ## Debug Bounding Box Recipe
 
@@ -168,7 +168,7 @@ for actor_snapshot in world_snapshot:
 # ...
 ```
 
-![debug_bb_recipe](img/debug_bb_recipe.png)
+![debug_bb_recipe](img/recipe_debug_bb.jpg)
 
 ## Debug Vehicle Trail Recipe
 
@@ -214,7 +214,7 @@ while True:
 The image below shows how a vehicle loses control and drives on a sidewalk. The trail shows the
 path it was following and the speed at each waypoint.
 
-![debug_trail_recipe](img/debug_trail_recipe.png)
+![debug_trail_recipe](img/recipe_debug_trail.jpg)
 
 ## Traffic lights Recipe
 

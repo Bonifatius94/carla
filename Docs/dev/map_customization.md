@@ -1,6 +1,6 @@
 <h1>Map customization</h1>
 
-> _This document is a work in progress and might be incomplete._
+There are several tools provided by the CARLA team that allow users to edit maps at will from the Unreal Editor. This tutorial introduces the most relevant tools, according to their purpose. 
 
 Creating a new map
 ------------------
@@ -40,85 +40,100 @@ Every street at a crossing should have its own turn at green without the other s
 MultipleFloorBuilding
 ---------------------
 
-The purpose of this blueprint is to make repeating and varying tall buildings a
-bit easier. Provided a Base, a MiddleFloor and a roof; this blueprint repeats
-the middle floor to the desired number of stores and tops it with the last floor
-given some conditions:
+![bp_spline_pic](img/map_customization/BP_Spline.jpg)
+<div style="text-align: right"><i>BP_Spline example.</i></div>
 
-  - All model pivots should be in the bottom center of the Specific mesh.
-  - Al models must start and end exactly where the repetition happen.
+### BP_Wall
 
-This blueprint is controlled by this 6 specific Parameters:
+The blueprint __BP_Wall__ adds __connected__ elements along the path defined by a Bezier curve. The mesh will not be warped to fit the curve, but the nodes will be respected.  
 
-  - GroundFloor: The mesh to be placed in the base of the building.
-  - Floor: The mesh to be repeated along the building.
-  - Roof: Final mesh to top the building.
-  - FloorNumber: Number of stores of the building.
-  - FloorHeightOffset: Adjust The placement of every floor vertically.
-  - RoofOffset: Adjust the placement of the roof vertically.
+*   __Distance between__ — Set the distance between elements.  
+*   __Vertically aligned__ — If selected, the elements will be vertically aligned regarding the world axis.  
+*   __Scale offset__ — Scale the length of the mesh to round out the connection between elements.  
 
-All of This parameters can be modified once this blueprint is placed in the
-world.
+![bp_wall_pic](img/map_customization/BP_Wall.jpg)
+<div style="text-align: right"><i>BP_Wall example.</i></div>
 
+### BP_SplinePowerLine
+
+The blueprint __BP_SplinePowerLine__ adds __electricity poles__ along the path defined by a Bezier curve, and __connects them with power lines__.  
+
+This blueprint can be found in `Carla/Static/Pole`. This blueprint allows to set an __array of meshes__ to repeat, to provide variety.  
+
+![bp_splinepowerline_pic](img/map_customization/BP_Splinepowerline.jpg)
+<div style="text-align: right"><i>BP_SplinePowerLine example.</i></div>
+
+The power line that connects the pole meshes can be customized.  
+
+*   __Choose the mesh__ that will be used as wire.  
+*   __Edit the tension__ value. If `0`, the power lines will be staight. The bigger the value, the looser the connection.  
+*   __Set the sockets__. Sockets are empty meshes that represent the connection points of the power line. A wire is created form socket to socket between poles. The amount of sockets can be changed inside the pole meshes.  
+
+![bp_powerline_socket_pic](img/map_customization/BP_Splinepowerline_Sockets.jpg)
+<div style="text-align: right"><i>Visualization of the sockets for BP_SplinePowerLine.</i></div>
+
+!!! Important
+    The amount of sockets and their names should be consistent between poles. Otherwise, visualization issues may arise. 
+
+<<<<<<< HEAD:Docs/dev/map_customization.md
 SplinemeshRepeater
 ------------------
+=======
+---
+## Procedural buildings
 
-!!! Bug
-    See [#35 SplineMeshRepeater loses its collider mesh](https://github.com/carla-simulator/carla/issues/35)
+The blueprint __BP_Procedural_Building__ in `Content/Carla/Blueprints/LevelDesign` creates a realistic building using key meshes that are repeated along the structure. For each of them, the user can provide an array of meshes that will be used at random for variety. The meshes are only created once, and the repetitions will be instances of the same to save up costs.  
 
+!!! Note
+    Blueprints can be used instead of meshes, to allow more variety and customization for the building. Blueprints can use behaviour trees to set illumination inside the building, change the materials used, and much more.  
+
+### Building structure
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:Docs/tuto_A_map_customization.md
+
+The key meshes will be updated everytime a change is made, and the building will disappear. Enable `Create automatically` or click on `Create Building` to see the new result. 
+
+<<<<<<< HEAD:Docs/dev/map_customization.md
 <h4>Standard use:</h4>
+=======
+These key meshes can be percieved as pieces of the building's structure. They can be grouped in four categories.  
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:Docs/tuto_A_map_customization.md
 
-SplineMeshRepeater "Content/Blueprints/SplineMeshRepeater" is a tool included in
-the Carla Project to help building urban environments; It repeats and aligns a
-specific chosen mesh along a
-[Spline](https://docs.unrealengine.com/latest/INT/Engine/BlueprintSplines/Reference/SplineEditorTool/index.html)
-(Unreal Component). Its principal function is to build Typically tiled and
-repetitive structures as Walls, Roads, Bridges, Fences... Once the actor is
-placed into the world the spline can be modified so the object gets the desired
-form. Each Point Defining the spline Generates a new tile so that as more points
-the Spline has, the more defined it will be, but also heavier on the world. This
-actor is defined by the following parameters:
+*   __Base__ — The ground floor of the building.  
+*   __Body__ — The middle floors of the building.  
+*   __Top__ — The highest floor of the building.  
+*   __Roof__ — Additional mesh that used to fill the spaces in the middle of the top floor.  
 
-  - StaticMesh: The mesh to be repeated along the spline.
-  - ForWardAxis: Changes the mesh axis to be aligned with the spline.
-  - Material: Overrides the mesh' default material.
-  - Collision Enabled: Chooses the type of collision to use.
-  - Gap distance: Places a Gap between each repeated mesh, for repetitive non continuous walls: bush chains, bollards...
+For each of them, except the __Roof__, there is a mesh to fill the center of the floor, and a __Corner__ mesh that will be placed on the sides of the floor. The following picture represents the global structure. 
 
-(Last three variables are specific for some particular assets to be defined in
-the next point) A requisite to create assets compatibles with this component is
-that all the meshes have their pivot placed wherever the repetition starts in
-the lower point possible with the rest of the mesh pointing positive (Preferably
-by the X axis)
+![bp_procedural_building_visual](img/map_customization/BP_Procedural_Building_Visual.jpg)
+<div style="text-align: right"><i>Visualization of the building structure.</i></div>
 
+<<<<<<< HEAD:Docs/dev/map_customization.md
 
 <h4>Specific Walls (Dynamic material)</h4>
+=======
+The __Base parameters__ set the dimensions of the building.  
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:Docs/tuto_A_map_customization.md
 
-In the project folder "Content/Static/Walls" are included some specific assets
-to be used with this SplineMeshRepeater with a series of special
-characteristics. The UV space of this meshes and their materials are the same
-for all of them, making them exchangeable. each material is composed of three
-different surfaces the last three parameters slightly modify the color of this
-surfaces:
+*   ___Num Floors__ — Floors of the building. Repetitions of the __Body__ meshes.  
+*   __Length X and Length Y__ — Area of the building. Repetitions of the central meshes for each side of the building.  
 
-  - MainMaterialColor: Change the main material of the Wall
-  - DetailsColor: Change the color of the details (if any)
-  - TopWallColor: Change the color of the wall cover (if any)
+![bp_procedural_building_full](img/map_customization/BP_Procedural_Building_Full.jpg)
+<div style="text-align: right"><i>Example of BP_Procedural_Building.</i></div>
 
-   To add elements that profit from this functions exist the GardenWallMask File that defines the uv space to place the materials: (Blue space: MainMaterial; green space: Details; red space TopWall).
+### Structure modifications
 
-Between the material masters is WallMaster which is going to be the master of
-the materials using this function. An instance of this material will be created
-and the correspondent textures will be added. This material includes the
-following parameters to be modified by the material to use:
+There are some additional options to modify the general structure of the building.  
 
-  - Normal Flattener: Slightly modifies the normal map values to exaggerate it or flatten it.
-  - RoughnessCorrection: Changes the Roughness value given by the texture.
+*   __Disable corners__ — If selected, no corner meshes will be used.  
+*   __Use full blocks__ — If selected, the structure of the building will use only one mesh per floor. No corners nor repetitions will appear in each floor.  
+*   __Doors__ — Meshes that appear in the ground floor, right in front of the central meshes. The amount of dloors and their location can be set. `0` is the initial position, `1` the next base repetition, and so on.  
+*   __Walls__ — Meshes that substitute one or more sides of the building. For example, a plane mesh can be used to paint one side of the building. 
 
-The rest of the parameters are the mask the textures and the color corrections
-that won't be modified in this instance but in the blueprint that will be
-launched into the world.
+![bp_procedural_building_extras](img/map_customization/BP_Procedural_Building_Extras.jpg)
+<div style="text-align: right"><i>On the left, a building with no cornes and one door. <br> On the right, a building with a wall applied to one side of the building. The wall is a texture with no fire escape.</i></div>
 
+<<<<<<< HEAD:Docs/dev/map_customization.md
 Weather
 -------
 
@@ -159,3 +174,17 @@ Postprocess Volume (Boundless) And Light Source to exist in the world.
 You can have as many different configurations saved in the project as you want
 and choose the configuration to apply while on the build, through the settings
 file; or in the editor while building the level or testing.
+=======
+---
+
+That is all there is so far, regarding the different map customization tools available in CARLA.
+
+Open CARLA and mess around for a while. If there are any doubts, feel free to post these in the forum. 
+
+<div class="build-buttons">
+<p>
+<a href="https://forum.carla.org/" target="_blank" class="btn btn-neutral" title="Go to the CARLA forum">
+CARLA forum</a>
+</p>
+</div>
+>>>>>>> 4dc4cb81853670d83ee067ae747c8c851926dacd:Docs/tuto_A_map_customization.md
