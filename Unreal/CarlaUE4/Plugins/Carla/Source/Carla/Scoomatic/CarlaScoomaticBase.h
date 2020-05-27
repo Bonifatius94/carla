@@ -6,24 +6,25 @@
 
 #pragma once
 
-#include "WheeledVehicle.h"
+// TODO Ist in 0.9.6 nicht vorhanden, aber in  0.9.9. Weiß auch nicht woher das kommt.
+// #include "WheeledVehicle.h"
 
-#include "Vehicle/CarlaWheeledVehicleState.h"
-#include "Vehicle/VehicleControl.h"
-#include "Vehicle/VehicleLightState.h"
-#include "Vehicle/VehicleInputPriority.h"
-#include "Vehicle/VehiclePhysicsControl.h"
-#include "WheeledVehicleMovementComponent4W.h"
+#include "Scoomatic/CarlaScoomaticBaseState.h"
+#include "Scoomatic/ScoomaticControl.h"
+// #include "Vehicle/VehicleLightState.h" // TODO lights were not included in 0.9.6, required now?
+#include "Scoomatic/ScoomaticInputPriority.h"
+// #include "Vehicle/VehiclePhysicsControl.h" // TODO no scoomatic physics control?
+// #include "WheeledVehicleMovementComponent4W.h" // TODO no movement component
 
 #include "CoreMinimal.h"
 
-#include "CarlaWheeledVehicle.generated.h"
+#include "CarlaScoomaticBase.generated.h"
 
 class UBoxComponent;
 
-/// Base class for CARLA wheeled vehicles.
+/// Base class for CARLA Scoomatic Bases.
 UCLASS()
-class CARLA_API ACarlaWheeledVehicle : public AWheeledVehicle
+class CARLA_API ACarlaScoomaticBase : public AScoomaticBase
 {
   GENERATED_BODY()
 
@@ -33,9 +34,9 @@ class CARLA_API ACarlaWheeledVehicle : public AWheeledVehicle
   /// @{
 public:
 
-  ACarlaWheeledVehicle(const FObjectInitializer &ObjectInitializer);
+  ACarlaScoomaticBase(const FObjectInitializer &ObjectInitializer);
 
-  ~ACarlaWheeledVehicle();
+  ~ACarlaScoomaticBase();
 
   /// @}
   // ===========================================================================
@@ -44,52 +45,58 @@ public:
   /// @{
 public:
 
-  /// Vehicle control currently applied to this vehicle.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  const FVehicleControl &GetVehicleControl() const
+  /// Scoomatic control currently applied to this Scoomatic.
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  const FScoomaticControl &GetScoomaticControl() const
   {
     return LastAppliedControl;
   }
 
-  /// Transform of the vehicle. Location is shifted so it matches center of the
-  /// vehicle bounds rather than the actor's location.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  FTransform GetVehicleTransform() const
+  /// Transform of the Scoomatic. Location is shifted so it matches center of the
+  /// Scoomatic bounds rather than the actor's location.
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  FTransform GetScoomaticTransform() const
   {
     return GetActorTransform();
   }
-
+/* TODO Forward speed previously not implemented in Scoomatic 0.9.6
   /// Forward speed in cm/s. Might be negative if goes backwards.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   float GetVehicleForwardSpeed() const;
+  */
 
   /// Orientation vector of the vehicle, pointing forward.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  FVector GetVehicleOrientation() const;
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  FVector GetScoomaticOrientation() const;
 
+/* No gear for Scoomatic
   /// Active gear of the vehicle.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   int32 GetVehicleCurrentGear() const;
+  */
 
-  /// Transform of the vehicle's bounding box relative to the vehicle.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  FTransform GetVehicleBoundingBoxTransform() const;
+  /// Transform of the Scoomatic's bounding box relative to the Scoomatic.
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  FTransform GetScoomaticBoundingBoxTransform() const;
 
-  /// Extent of the vehicle's bounding box.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  FVector GetVehicleBoundingBoxExtent() const;
+  /// Extent of the Scoomatic's bounding box.
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  FVector GetScoomaticBoundingBoxExtent() const;
 
-  /// Get vehicle's bounding box component.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  UBoxComponent *GetVehicleBoundingBox() const
+  /// Get Scoomatics's bounding box component.
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  UBoxComponent *GetScoomaticBoundingBox() const
   {
-    return VehicleBounds;
+    return ScoomaticBounds;
   }
 
+/*
   /// Get the maximum angle at which the front wheel can steer.
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   float GetMaximumSteerAngle() const;
+*/
 
+/* TODO AI debug state is new?
   /// @}
   // ===========================================================================
   /// @name AI debug state
@@ -97,37 +104,38 @@ public:
   /// @{
 public:
 
-  /// @todo This function should be private to AWheeledVehicleAIController.
-  void SetAIVehicleState(ECarlaWheeledVehicleState InState)
+  /// @todo This function should be private to AScoomaticBaseAIController.
+  void SetAIVehicleState(ECarlaScoomaticBaseState InState)
   {
     State = InState;
   }
 
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  ECarlaWheeledVehicleState GetAIVehicleState() const
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  ECarlaScoomaticBaseState GetAIVehicleState() const
   {
     return State;
   }
 
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   FVehiclePhysicsControl GetVehiclePhysicsControl();
 
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   FVehicleLightState GetVehicleLightState();
 
   void ApplyVehiclePhysicsControl(const FVehiclePhysicsControl &PhysicsControl);
 
-  void SetVehicleLightState(const FVehicleLightState &LightState);
+  // void SetVehicleLightState(const FVehicleLightState &LightState); // TODO light state
+*/
 
   /// @}
   // ===========================================================================
-  /// @name Vehicle input control
+  /// @name Scoomatic input control
   // ===========================================================================
   /// @{
 public:
 
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void ApplyVehicleControl(const FVehicleControl &Control, EVehicleInputPriority Priority)
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  void ApplyScoomaticControl(const FScoomaticControl &Control, EScoomaticInputPriority Priority)
   {
     if (InputControl.Priority <= Priority)
     {
@@ -136,8 +144,8 @@ public:
     }
   }
 
-  /// @todo This function should be private to AWheeledVehicleAIController.
-  void FlushVehicleControl();
+  /// @todo This function should be private to AScoomaticBaseAIController.
+  void FlushScoomaticControl();
 
   /// @}
   // ===========================================================================
@@ -146,42 +154,11 @@ public:
   /// @{
 public:
 
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void SetThrottleInput(float Value);
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  void SetLeftVelocity(float Value);
 
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void SetSteeringInput(float Value);
-
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void SetBrakeInput(float Value);
-
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void SetReverse(bool Value);
-
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void ToggleReverse()
-  {
-    SetReverse(!LastAppliedControl.bReverse);
-  }
-
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void SetHandbrakeInput(bool Value);
-
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void HoldHandbrake()
-  {
-    SetHandbrakeInput(true);
-  }
-
-  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
-  void ReleaseHandbrake()
-  {
-    SetHandbrakeInput(false);
-  }
-
-  TArray<float> GetWheelsFrictionScale();
-
-  void SetWheelsFrictionScale(TArray<float> &WheelsFrictionScale);
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  void SetRightVelocity(float Value);
 
   /// @}
   // ===========================================================================
@@ -193,25 +170,43 @@ protected:
 
   virtual void BeginPlay() override;
 
-  UFUNCTION(BlueprintImplementableEvent)
-  void RefreshLightState(const FVehicleLightState &VehicleLightState);
+  // TODO necessary?
+  // UFUNCTION(BlueprintImplementableEvent)
+  // void RefreshLightState(const FVehicleLightState &VehicleLightState);
+
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  float GetLeftVelocity()
+  {
+    return VelocityLeft;
+  }
+
+  UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
+  float GetRightVelocity()
+  {
+    return VelocityRight;
+  }
+
+  UPROPERTY(Category = "Scoomatic Attribute", VisibleAnywhere)
+  float VelocityLeft;
+  UPROPERTY(Category = "Scoomatic Attribute", VisibleAnywhere)
+  float VelocityRight;
 
 private:
 
-  /// Current state of the vehicle controller (for debugging purposes).
+  /// Current state of the Scoomatic controller (for debugging purposes).
   UPROPERTY(Category = "AI Controller", VisibleAnywhere)
-  ECarlaWheeledVehicleState State = ECarlaWheeledVehicleState::UNKNOWN;
+  ECarlaScoomaticBaseState State = ECarlaScoomaticBaseState::UNKNOWN;
 
-  UPROPERTY(Category = "CARLA Wheeled Vehicle", EditAnywhere)
-  UBoxComponent *VehicleBounds;
+  UPROPERTY(Category = "CARLA Scoomatic Base", EditAnywhere)
+  UBoxComponent *ScoomaticBounds;
 
   struct
   {
-    EVehicleInputPriority Priority = EVehicleInputPriority::INVALID;
-    FVehicleControl Control;
-    FVehicleLightState LightState;
+    EScoomaticInputPriority Priority = EScoomaticInputPriority::INVALID;
+    FScoomaticControl Control;
+    // FVehicleLightState LightState;
   }
   InputControl;
 
-  FVehicleControl LastAppliedControl;
+  FScoomaticControl LastAppliedControl;
 };
