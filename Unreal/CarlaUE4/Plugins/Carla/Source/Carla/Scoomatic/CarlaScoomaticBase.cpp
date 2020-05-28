@@ -6,36 +6,36 @@
 // For a copy, see <https://opensource.org/licenses/MIT>.
 
 #include "Carla.h"
-#include "Carla/Vehicle/CarlaWheeledVehicle.h"
+#include "Carla/Scoomatic/CarlaScoomaticBase.h"
 
 #include "Components/BoxComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "PhysXPublic.h"
 #include "PhysXVehicleManager.h"
-#include "TireConfig.h"
-#include "VehicleWheel.h"
+// #include "TireConfig.h"
+// #include "VehicleWheel.h"
 
 // =============================================================================
 // -- Constructor and destructor -----------------------------------------------
 // =============================================================================
 
-ACarlaWheeledVehicle::ACarlaWheeledVehicle(const FObjectInitializer& ObjectInitializer) :
+ACarlaScoomaticBase::ACarlaScoomaticBase(const FObjectInitializer& ObjectInitializer) :
   Super(ObjectInitializer)
 {
-  VehicleBounds = CreateDefaultSubobject<UBoxComponent>(TEXT("VehicleBounds"));
-  VehicleBounds->SetupAttachment(RootComponent);
-  VehicleBounds->SetHiddenInGame(true);
-  VehicleBounds->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+  ScoomaticBounds = CreateDefaultSubobject<UBoxComponent>(TEXT("VehicleBounds"));
+  ScoomaticBounds->SetupAttachment(RootComponent);
+  ScoomaticBounds->SetHiddenInGame(true);
+  ScoomaticBounds->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 
-  GetVehicleMovementComponent()->bReverseAsBrake = false;
+  // GetVehicleMovementComponent()->bReverseAsBrake = false;
 }
 
-ACarlaWheeledVehicle::~ACarlaWheeledVehicle() {}
+ACarlaWheeledVehicle::~ACarlaScoomaticBase() {}
 
-void ACarlaWheeledVehicle::BeginPlay()
+void ACarlaScoomaticBase::BeginPlay()
 {
   Super::BeginPlay();
-
+/*
   float FrictionScale = 3.5f;
 
   UWheeledVehicleMovementComponent4W *Vehicle4W = Cast<UWheeledVehicleMovementComponent4W>(
@@ -78,37 +78,43 @@ void ACarlaWheeledVehicle::BeginPlay()
   }
 
   Vehicle4W->WheelSetups = NewWheelSetups;
+  */
 }
 
 // =============================================================================
 // -- Get functions ------------------------------------------------------------
 // =============================================================================
 
+/* TODO vehicle spedific?
 float ACarlaWheeledVehicle::GetVehicleForwardSpeed() const
 {
   return GetVehicleMovementComponent()->GetForwardSpeed();
 }
+*/
 
-FVector ACarlaWheeledVehicle::GetVehicleOrientation() const
+FVector ACarlaScoomaticBase::GetScoomaticOrientation() const
 {
-  return GetVehicleTransform().GetRotation().GetForwardVector();
+  return GetScoomaticTransform().GetRotation().GetForwardVector();
 }
 
+/*
 int32 ACarlaWheeledVehicle::GetVehicleCurrentGear() const
 {
   return GetVehicleMovementComponent()->GetCurrentGear();
 }
+*/
 
-FTransform ACarlaWheeledVehicle::GetVehicleBoundingBoxTransform() const
+FTransform ACarlaScoomaticBase::GetScoomaticBoundingBoxTransform() const
 {
-  return VehicleBounds->GetRelativeTransform();
+  return ScoomaticBounds->GetRelativeTransform();
 }
 
-FVector ACarlaWheeledVehicle::GetVehicleBoundingBoxExtent() const
+FVector ACarlaScoomaticBase::GetScoomaticBoundingBoxExtent() const
 {
-  return VehicleBounds->GetScaledBoxExtent();
+  return ScoomaticBounds->GetScaledBoxExtent();
 }
 
+/*
 float ACarlaWheeledVehicle::GetMaximumSteerAngle() const
 {
   const auto &Wheels = GetVehicleMovementComponent()->Wheels;
@@ -117,13 +123,15 @@ float ACarlaWheeledVehicle::GetMaximumSteerAngle() const
   check(FrontWheel != nullptr);
   return FrontWheel->SteerAngle;
 }
+*/
 
 // =============================================================================
 // -- Set functions ------------------------------------------------------------
 // =============================================================================
 
-void ACarlaWheeledVehicle::FlushVehicleControl()
+void ACarlaScoomaticBase::FlushScoomaticControl()
 {
+  /*
   auto *MovementComponent = GetVehicleMovementComponent();
   MovementComponent->SetThrottleInput(InputControl.Control.Throttle);
   MovementComponent->SetSteeringInput(InputControl.Control.Steer);
@@ -144,10 +152,15 @@ void ACarlaWheeledVehicle::FlushVehicleControl()
   }
   InputControl.Control.Gear = MovementComponent->GetCurrentGear();
   InputControl.Control.bReverse = InputControl.Control.Gear < 0;
+  */
+  VelocityLeft = InputControl.Control.LeftVelocity;
+  VelocityRight = InputControl.Control.RightVelocity;
+
   LastAppliedControl = InputControl.Control;
   InputControl.Priority = EVehicleInputPriority::INVALID;
 }
 
+/*
 void ACarlaWheeledVehicle::SetThrottleInput(const float Value)
 {
   FVehicleControl Control = InputControl.Control;
@@ -379,4 +392,19 @@ void ACarlaWheeledVehicle::SetVehicleLightState(const FVehicleLightState &LightS
 {
   InputControl.LightState = LightState;
   RefreshLightState(LightState);
+}
+*/
+
+void ACarlaScoomaticBase::SetLeftVelocity(const float Value)
+{
+  FScoomaticControl Control = InputControl.Control;
+  Control.LeftVelocity = Value;
+  ApplyScoomaticControl(Control, EScoomaticInputPriority::User);
+}
+
+void ACarlaScoomaticBase::SetRightVelocity(const float Value)
+{
+  FScoomaticControl Control = InputControl.Control;
+  Control.RightVelocity = Value;
+  ApplyScoomaticControl(Control, EScoomaticInputPriority::User);
 }
