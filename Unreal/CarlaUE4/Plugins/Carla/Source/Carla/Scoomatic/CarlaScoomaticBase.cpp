@@ -30,7 +30,7 @@ ACarlaScoomaticBase::ACarlaScoomaticBase(const FObjectInitializer& ObjectInitial
   // GetVehicleMovementComponent()->bReverseAsBrake = false;
 }
 
-ACarlaWheeledVehicle::~ACarlaScoomaticBase() {}
+ACarlaScoomaticBase::~ACarlaScoomaticBase() {}
 
 void ACarlaScoomaticBase::BeginPlay()
 {
@@ -157,7 +157,7 @@ void ACarlaScoomaticBase::FlushScoomaticControl()
   VelocityRight = InputControl.Control.RightVelocity;
 
   LastAppliedControl = InputControl.Control;
-  InputControl.Priority = EVehicleInputPriority::INVALID;
+  InputControl.Priority = EScoomaticInputPriority::INVALID;
 }
 
 /*
