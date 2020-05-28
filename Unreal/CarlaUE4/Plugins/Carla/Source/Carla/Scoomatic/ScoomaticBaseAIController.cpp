@@ -104,7 +104,7 @@ void AScoomaticBaseAIController::OnPossess(APawn *aPawn)
 {
   Super::OnPossess(aPawn);
 
-  if (IsPossessingAVehicle())
+  if (IsPossessingAScoomatic())
   {
     UE_LOG(LogCarla, Error, TEXT("Controller already possessing a scoomatic!"));
     return;
