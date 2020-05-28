@@ -10,18 +10,18 @@
 
 #include "GameFramework/Controller.h"
 
-#include "Traffic/TrafficLightState.h"
-#include "Vehicle/VehicleControl.h"
+// #include "Traffic/TrafficLightState.h"
+#include "Scoomatic/ScoomaticControl.h"
 
-#include "WheeledVehicleAIController.generated.h"
+#include "ScoomaticBaseAIController.generated.h"
 
-class ACarlaWheeledVehicle;
-class URandomEngine;
-class URoadMap;
+class ACarlaScoomaticBase;
+// TODO class URandomEngine;
+// TODO class URoadMap;
 
 /// Wheeled vehicle controller with optional AI.
 UCLASS()
-class CARLA_API AWheeledVehicleAIController final : public AController
+class CARLA_API AScoomaticBaseAIController final : public AController
 {
   GENERATED_BODY()
 
@@ -32,9 +32,9 @@ class CARLA_API AWheeledVehicleAIController final : public AController
 
 public:
 
-  AWheeledVehicleAIController(const FObjectInitializer &ObjectInitializer);
+  AScoomaticBaseAIController(const FObjectInitializer &ObjectInitializer);
 
-  ~AWheeledVehicleAIController();
+  ~AScoomaticBaseAIController();
 
   /// @}
   // ===========================================================================
@@ -58,21 +58,22 @@ public:
 
 public:
 
-  UFUNCTION(Category = "Wheeled Vehicle Controller", BlueprintCallable)
-  bool IsPossessingAVehicle() const
+  UFUNCTION(Category = "Scoomatic Base Controller", BlueprintCallable)
+  bool IsPossessingAScoomatic() const
   {
-    return Vehicle != nullptr;
+    return Scoomatic != nullptr;
   }
 
-  UFUNCTION(Category = "Wheeled Vehicle Controller", BlueprintCallable)
-  ACarlaWheeledVehicle *GetPossessedVehicle()
+  // TODO Warum kommt das hier zwei mal vor?
+  UFUNCTION(Category = "Scoomatic Base Controller", BlueprintCallable)
+  ACarlaScoomaticBase *GetPossessedScoomatic()
   {
-    return Vehicle;
+    return Scoomatic;
   }
 
-  const ACarlaWheeledVehicle *GetPossessedVehicle() const
+  const ACarlaScoomaticBase *GetPossessedScoomatic() const
   {
-    return Vehicle;
+    return Scoomatic;
   }
 
   /// @}
@@ -81,7 +82,7 @@ public:
   // ===========================================================================
   /// @{
 
-  UFUNCTION(Category = "Wheeled Vehicle Controller", BlueprintCallable)
+  UFUNCTION(Category = "Scoomatic Base Controller", BlueprintCallable)
   void SetStickyControl(bool bEnabled)
   {
     bControlIsSticky = bEnabled;
@@ -93,6 +94,7 @@ public:
   // ===========================================================================
   /// @{
 
+/* TODO
 public:
 
   void SetRoadMap(URoadMap *InRoadMap)
@@ -105,6 +107,7 @@ public:
   {
     return RoadMap;
   }
+*/
 
   /// @}
   // ===========================================================================
@@ -112,6 +115,7 @@ public:
   // ===========================================================================
   /// @{
 
+/* TODO
 public:
 
   UFUNCTION(Category = "Random Engine", BlueprintCallable)
@@ -120,6 +124,7 @@ public:
     check(RandomEngine != nullptr);
     return RandomEngine;
   }
+*/
 
   /// @}
   // ===========================================================================
@@ -129,12 +134,13 @@ public:
 
 public:
 
-  UFUNCTION(Category = "Wheeled Vehicle Controller", BlueprintCallable)
+  UFUNCTION(Category = "Scoomatic Base Controller", BlueprintCallable)
   bool IsAutopilotEnabled() const
   {
     return bAutopilotEnabled;
   }
 
+  /* TODO
   UFUNCTION(Category = "Wheeled Vehicle Controller", BlueprintCallable)
   void SetAutopilot(bool Enable, bool KeepState = false)
   {
@@ -153,6 +159,7 @@ public:
 private:
 
   void ConfigureAutopilot(const bool Enable, const bool KeepState = false);
+*/
 
   /// @}
   // ===========================================================================
@@ -160,6 +167,7 @@ private:
   // ===========================================================================
   /// @{
 
+/* TODO
 public:
 
   /// Get current speed limit in km/h.
@@ -240,4 +248,22 @@ private:
   ATrafficLightBase *TrafficLight;
 
   std::queue<FVector> TargetLocations;
+  */
+
+ /// @}
+  // ===========================================================================
+  // -- Member variables -------------------------------------------------------
+  // ===========================================================================
+  /// @{
+
+private:
+
+  UPROPERTY() // TODO Das gab es in 0.9.9 nicht mehr
+  ACarlaScoomaticBase *Scoomatic = nullptr;
+
+  UPROPERTY(VisibleAnywhere)
+  bool bAutopilotEnabled = false;
+
+  UPROPERTY(VisibleAnywhere)
+  bool bControlIsSticky = true;
 };
