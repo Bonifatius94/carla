@@ -12,4 +12,4 @@ struct CARLA_API FScoomaticControl
 
     UPROPERTY(Category = "Scoomatic Control", EditAnywhere, BlueprintReadWrite)
     float RightVelocity = 0.0f;
-}
+};
