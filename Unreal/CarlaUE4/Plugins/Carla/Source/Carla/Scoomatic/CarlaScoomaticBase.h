@@ -24,7 +24,7 @@ class UBoxComponent;
 
 /// Base class for CARLA Scoomatic Bases.
 UCLASS()
-class CARLA_API ACarlaScoomaticBase : public AScoomaticBase
+class CARLA_API ACarlaScoomaticBase : public APawn
 {
   GENERATED_BODY()
 
