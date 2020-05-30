@@ -13,6 +13,8 @@ Plugins/Carla/DerivedDataCache
 Plugins/Carla/Intermediate
 Plugins/Carla/Saved
 
+# Watch Scoomatic
+# https://stackoverflow.com/questions/5533050/gitignore-exclude-folder-but-include-specific-subfolder
 Content/*
 !Content/Carla
 
@@ -24,6 +26,7 @@ Content/Carla/Static/*
 
 Content/Carla/Static/Vehicles/*
 !Content/Carla/Static/Vehicles/Scoomatic
+
 
 Config/CarlaSettings.ini
 Config/DefaultEditor.ini
