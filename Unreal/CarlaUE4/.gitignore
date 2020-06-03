@@ -27,6 +27,16 @@ Content/Carla/Static/*
 Content/Carla/Static/Vehicles/*
 !Content/Carla/Static/Vehicles/Scoomatic
 
+# Watch CarlaGameMode
+!Content/Carla/Blueprints
+
+Content/Carla/Blueprints/*
+!Content/Carla/Blueprints/Game/
+
+Content/Carla/Blueprints/Game/*
+!Content/Carla/Blueprints/Game/CarlaGameMode.uasset
+
+#
 
 Config/CarlaSettings.ini
 Config/DefaultEditor.ini
