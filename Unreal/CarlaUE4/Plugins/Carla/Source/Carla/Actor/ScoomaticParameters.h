@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "Carla/Vehicle/CarlaWheeledVehicle.h"
+#include "Carla/Scoomatic/CarlaScoomaticBase.h"
 
-#include "VehicleParameters.generated.h"
+#include "ScoomaticParameters.generated.h"
 
 USTRUCT(BlueprintType)
-struct CARLA_API FVehicleParameters
+struct CARLA_API FScoomaticParameters
 {
   GENERATED_BODY()
 
@@ -22,8 +22,9 @@ struct CARLA_API FVehicleParameters
   FString Model;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  TSubclassOf<ACarlaWheeledVehicle> Class;
+  TSubclassOf<ACarlaScoomatic> Class;
 
+/*
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   int32 NumberOfWheels = 4;
 
@@ -38,4 +39,5 @@ struct CARLA_API FVehicleParameters
   /// empty if no driver is supported.
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   TArray<int32> SupportedDrivers;
+  */
 };
