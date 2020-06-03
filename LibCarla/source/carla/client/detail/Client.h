@@ -39,6 +39,7 @@ namespace rpc {
   class VehicleControl;
   class WalkerControl;
   class WalkerBoneControl;
+  class ScoomaticControl;
 }
 namespace sensor {
   class SensorData;
@@ -182,6 +183,11 @@ namespace detail {
     void ApplyBoneControlToWalker(
         rpc::ActorId walker,
         const rpc::WalkerBoneControl &control);
+
+    // Scoomatic
+    void ApplyControlToScoomatic(
+        rpc::ActorId scoomatic,
+        const rpc::ScoomaticControl &control);
 
     void SetTrafficLightState(
         rpc::ActorId traffic_light,
