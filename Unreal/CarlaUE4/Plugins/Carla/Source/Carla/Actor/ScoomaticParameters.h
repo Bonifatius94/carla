@@ -22,7 +22,7 @@ struct CARLA_API FScoomaticParameters
   FString Model;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  TSubclassOf<ACarlaScoomatic> Class;
+  TSubclassOf<ACarlaScoomaticBase> Class;
 
 /*
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
