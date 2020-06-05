@@ -45,3 +45,7 @@ _out*
 _site
 core
 profiler.csv
+
+Content.tar.gz
+
+Log/

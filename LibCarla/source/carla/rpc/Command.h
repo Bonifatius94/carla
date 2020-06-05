@@ -13,6 +13,7 @@
 #include "carla/rpc/ActorId.h"
 #include "carla/rpc/VehicleControl.h"
 #include "carla/rpc/WalkerControl.h"
+#include "carla/rpc/ScoomaticControl.h"
 
 #include <boost/variant.hpp>
 
@@ -168,11 +169,22 @@ namespace rpc {
       MSGPACK_DEFINE_ARRAY(actor, enabled);
     };
 
+    struct ApplyScoomaticControl : CommandBase<ApplyScoomaticControl> {
+      ApplyScoomaticControl() = default;
+      ApplyScoomaticControl(ActorId id, const ScoomaticControl &value)
+        : actor(id),
+          control(value) {}
+      ActorId actor;
+      ScoomaticControl control;
+      MSGPACK_DEFINE_ARRAY(actor, control);
+    };
+
     using CommandType = boost::variant<
         SpawnActor,
         DestroyActor,
         ApplyVehicleControl,
         ApplyWalkerControl,
+        ApplyScoomaticControl,
         ApplyTransform,
         ApplyWalkerState,
         ApplyVelocity,

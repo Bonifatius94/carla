@@ -12,6 +12,7 @@
 #include "carla/rpc/TrafficLightState.h"
 #include "carla/rpc/VehicleControl.h"
 #include "carla/rpc/WalkerControl.h"
+#include "carla/rpc/ScoomaticControl.h"
 
 #include <cstdint>
 
@@ -89,6 +90,28 @@ namespace detail {
 
 #pragma pack(pop)
 
+#pragma pack(push, 1) // Scoomatic
+  class PackedScoomaticControl {
+  public:
+
+    PackedScoomaticControl() = default;
+
+    PackedScoomaticControl(const rpc::ScoomaticControl &control)
+      : left_velocity(control.left_velocity), 
+        right_velocity(control.right_velocity) {}
+
+    operator rpc::ScoomaticControl() const {
+      return {left_velocity, right_velocity};
+    }
+
+  private:
+
+    float left_velocity;
+    float right_velocity;
+  };
+
+#pragma pack(pop)
+
 #pragma pack(push, 1)
 
   struct TrafficLightData {
@@ -135,6 +158,7 @@ namespace detail {
       detail::TrafficSignData traffic_sign_data;
       detail::VehicleData vehicle_data;
       detail::PackedWalkerControl walker_control;
+      detail::PackedScoomaticControl scoomatic_control;
     } state;
   };
 

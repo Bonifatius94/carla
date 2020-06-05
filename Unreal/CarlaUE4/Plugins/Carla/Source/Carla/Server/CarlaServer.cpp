@@ -12,6 +12,7 @@
 #include "Carla/Util/NavigationMesh.h"
 #include "Carla/Vehicle/CarlaWheeledVehicle.h"
 #include "Carla/Walker/WalkerController.h"
+#include "Carla/Scoomatic/CarlaScoomaticBase.h" // TODO nicht in der Doku
 
 #include <compiler/disable-ue4-macros.h>
 #include <carla/Functional.h>
@@ -40,6 +41,8 @@
 #include <carla/rpc/WeatherParameters.h>
 #include <carla/streaming/Server.h>
 #include <compiler/enable-ue4-macros.h>
+
+#include <carla/rpc/ScoomaticControl.h>
 
 #include <vector>
 #include <map>
@@ -259,7 +262,7 @@ void FCarlaServer::FPimpl::BindActions()
   BIND_SYNC(copy_opendrive_to_file) << [this](const std::string &opendrive, carla::rpc::OpendriveGenerationParameters Params) -> R<void>
   {
     REQUIRE_CARLA_EPISODE();
-    if (!Episode->LoadNewOpendriveEpisode(cr::ToFString(opendrive), Params))
+    if (!Episode->LoadNewOpendriveEpisode(cr::ToLongFString(opendrive), Params))
     {
       RESPOND_ERROR("opendrive could not be correctly parsed");
     }
@@ -281,7 +284,7 @@ void FCarlaServer::FPimpl::BindActions()
     const auto &SpawnPoints = Episode->GetRecommendedSpawnPoints();
     return cr::MapInfo{
       cr::FromFString(Episode->GetMapName()),
-      cr::FromFString(FileContents),
+      cr::FromLongFString(FileContents),
       MakeVectorFromTArray<cg::Transform>(SpawnPoints)};
   };
 
@@ -774,6 +777,26 @@ void FCarlaServer::FPimpl::BindActions()
     return R<void>::Success();
   };
 
+  // Bind sync Scoomatic
+  BIND_SYNC(apply_control_to_scoomatic) << [this](
+    cr::ActorId ActorId,
+    cr::ScoomaticControl Control) -> R<void>
+  {
+    REQUIRE_CARLA_EPISODE();
+    auto ActorView = Episode->FindActor(ActorId);
+    if (!ActorView.IsValid())
+    {
+      RESPOND_ERROR("unable to apply control: actor not found");
+    }
+    auto ScoomaticBase = Cast<ACarlaScoomaticBase>(ActorView.GetActor());
+    if (ScoomaticBase == nullptr)
+    {
+      RESPOND_ERROR("unable to apply control: actor is not a scoomatic");
+    }
+    ScoomaticBase->ApplyScoomaticControl(Control, EScoomaticInputPriority::Client);
+    return R<void>::Success();
+  };
+
   BIND_SYNC(set_actor_autopilot) << [this](
       cr::ActorId ActorId,
       bool bEnabled) -> R<void>
@@ -1049,6 +1072,7 @@ void FCarlaServer::FPimpl::BindActions()
       [=](auto, const C::DestroyActor &c) {         MAKE_RESULT(destroy_actor(c.actor)); },
       [=](auto, const C::ApplyVehicleControl &c) {  MAKE_RESULT(apply_control_to_vehicle(c.actor, c.control)); },
       [=](auto, const C::ApplyWalkerControl &c) {   MAKE_RESULT(apply_control_to_walker(c.actor, c.control)); },
+      [=](auto, const C::ApplyScoomaticControl &c) {MAKE_RESULT(apply_control_to_scoomatic(c.actor, c.control)); }, // Scoomatic
       [=](auto, const C::ApplyTransform &c) {       MAKE_RESULT(set_actor_transform(c.actor, c.transform)); },
       [=](auto, const C::ApplyVelocity &c) {        MAKE_RESULT(set_actor_velocity(c.actor, c.velocity)); },
       [=](auto, const C::ApplyAngularVelocity &c) { MAKE_RESULT(set_actor_angular_velocity(c.actor, c.angular_velocity)); },
