@@ -43,6 +43,8 @@ def main():
 
         scoomatic.apply_control(scoomatic_control)
 
+        time.sleep(10)
+
     finally:
         print('destroying actors')
         client.apply_batch([carla.command.DestroyActor(x) for x in actor_list])
