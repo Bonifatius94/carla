@@ -137,11 +137,10 @@ public:
   UFUNCTION(Category = "CARLA Scoomatic Base", BlueprintCallable)
   void ApplyScoomaticControl(const FScoomaticControl &Control, EScoomaticInputPriority Priority)
   {
-    if (InputControl.Priority <= Priority)
-    {
-      InputControl.Control = Control;
-      InputControl.Priority = Priority;
-    }
+
+    InputControl.Control = Control;
+    InputControl.Priority = Priority;
+    
   }
 
   /// @todo This function should be private to AScoomaticBaseAIController.
@@ -188,6 +187,7 @@ protected:
 
   UPROPERTY(Category = "Scoomatic Attribute", VisibleAnywhere)
   float VelocityLeft;
+
   UPROPERTY(Category = "Scoomatic Attribute", VisibleAnywhere)
   float VelocityRight;
 

@@ -22,7 +22,7 @@
 ACarlaScoomaticBase::ACarlaScoomaticBase(const FObjectInitializer& ObjectInitializer) :
   Super(ObjectInitializer)
 {
-  ScoomaticBounds = CreateDefaultSubobject<UBoxComponent>(TEXT("VehicleBounds"));
+  ScoomaticBounds = CreateDefaultSubobject<UBoxComponent>(TEXT("ScoomaticBounds"));
   ScoomaticBounds->SetupAttachment(RootComponent);
   ScoomaticBounds->SetHiddenInGame(true);
   ScoomaticBounds->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
@@ -157,7 +157,7 @@ void ACarlaScoomaticBase::FlushScoomaticControl()
   VelocityRight = InputControl.Control.RightVelocity;
 
   LastAppliedControl = InputControl.Control;
-  InputControl.Priority = EScoomaticInputPriority::INVALID;
+  InputControl.Priority = EScoomaticInputPriority::User;
 }
 
 /*

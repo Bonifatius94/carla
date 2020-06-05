@@ -141,12 +141,6 @@ void AScoomaticBaseAIController::Tick(const float DeltaTime)
     return;
   }
 
-  if (!bAutopilotEnabled && !bControlIsSticky)
-  {
-    // TODO Autopilot not implemented
-    // Vehicle->ApplyVehicleControl(FVehicleControl{}, EVehicleInputPriority::Relaxation);
-  }
-
   Scoomatic->FlushScoomaticControl();
 }
 
