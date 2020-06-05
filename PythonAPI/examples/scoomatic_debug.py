@@ -39,8 +39,11 @@ def main():
         print('created %s' % scoomatic.type_id)
 
         scoomatic_control = carla.ScoomaticControl()
-        scoomatic_control.left_velocity = 10.0
+        scoomatic_control.left_velocity = 2.0
+        scoomatic_control.right_velocity = 2.0
 
+        time.sleep(2)
+        
         scoomatic.apply_control(scoomatic_control)
 
         time.sleep(10)
