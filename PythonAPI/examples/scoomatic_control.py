@@ -174,7 +174,6 @@ class World(object):
         # Spawn the player.
         if self.player is not None:
             spawn_point = self.player.get_transform()
-            spawn_point.location.z -= 1.5
             spawn_point.rotation.roll = 0.0
             spawn_point.rotation.pitch = 0.0
             self.destroy()
@@ -186,7 +185,6 @@ class World(object):
                 sys.exit(1)
             spawn_points = self.map.get_spawn_points()
             spawn_point = random.choice(spawn_points) if spawn_points else carla.Transform()
-	    spawn_point.location.z -= 1.5
 	    self.player = self.world.try_spawn_actor(blueprint, spawn_point)
         # Set up the sensors.
         self.collision_sensor = CollisionSensor(self.player, self.hud)
@@ -327,11 +325,11 @@ class KeyboardControl(object):
 
     def _parse_scoomatic_keys(self, keys, milliseconds):
 	if keys[K_LEFT] or keys[K_a]:
-	   self._control.left_velocity = 2000
+	   self._control.left_velocity = 1000
 	else:
 	   self._control.left_velocity = 0
 	if keys[K_RIGHT] or keys[K_d]:
-	   self._control.right_velocity = 2000
+	   self._control.right_velocity = 1000
 	else:
 	   self._control.right_velocity = 0
 
