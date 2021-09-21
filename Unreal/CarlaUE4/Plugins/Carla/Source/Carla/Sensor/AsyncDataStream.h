@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Computer Vision Center (CVC) at the Universitat Autonoma
+// Copyright (c) 2020 Computer Vision Center (CVC) at the Universitat Autonoma
 // de Barcelona (UAB).
 //
 // This work is licensed under the terms of the MIT license.
@@ -63,7 +63,10 @@ private:
 
   /// @pre This functions needs to be called in the game-thread.
   template <typename SensorT>
-  explicit FAsyncDataStreamTmpl(const SensorT &InSensor, StreamType InStream);
+  explicit FAsyncDataStreamTmpl(
+      const SensorT &InSensor,
+      double Timestamp,
+      StreamType InStream);
 
   StreamType Stream;
 
@@ -76,7 +79,7 @@ private:
 
 using FAsyncDataStream = FAsyncDataStreamTmpl<carla::streaming::Stream>;
 
-using FAsyncDataMultiStream = FAsyncDataStreamTmpl<carla::streaming::MultiStream>;
+using FAsyncDataMultiStream = FAsyncDataStreamTmpl<carla::streaming::Stream>;
 
 // =============================================================================
 // -- FAsyncDataStreamTmpl implementation --------------------------------------
@@ -90,18 +93,3 @@ inline void FAsyncDataStreamTmpl<T>::Send(SensorT &Sensor, ArgsT &&... Args)
       std::move(Header),
       carla::sensor::SensorRegistry::Serialize(Sensor, std::forward<ArgsT>(Args)...));
 }
-
-template <typename T>
-template <typename SensorT>
-inline FAsyncDataStreamTmpl<T>::FAsyncDataStreamTmpl(
-    const SensorT &Sensor,
-    StreamType InStream)
-  : Stream(std::move(InStream)),
-    Header([&Sensor]() {
-      check(IsInGameThread());
-      using Serializer = carla::sensor::s11n::SensorHeaderSerializer;
-      return Serializer::Serialize(
-          carla::sensor::SensorRegistry::template get<SensorT*>::index,
-          GFrameCounter,
-          Sensor.GetActorTransform());
-    }()) {}

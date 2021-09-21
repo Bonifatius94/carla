@@ -33,8 +33,6 @@ namespace detail {
 
     carla::streaming::Stream MakeStream();
 
-    carla::streaming::MultiStream MakeMultiStream();
-
     bool RegisterSession(std::shared_ptr<Session> session);
 
     void DeregisterSession(std::shared_ptr<Session> session);
@@ -49,8 +47,6 @@ namespace detail {
 
     token_type _cached_token;
 
-    /// @todo StreamStates should be cleaned up at some point, otherwise we keep
-    /// them alive the whole run.
     std::unordered_map<
         stream_id_type,
         std::weak_ptr<StreamStateBase>> _stream_map;

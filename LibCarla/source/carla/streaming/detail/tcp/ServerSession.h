@@ -14,7 +14,7 @@
 #include "carla/streaming/detail/tcp/Message.h"
 
 #include <boost/asio/deadline_timer.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 
@@ -25,6 +25,8 @@ namespace carla {
 namespace streaming {
 namespace detail {
 namespace tcp {
+
+  class Server;
 
   /// A TCP server session. When a session opens, it reads from the socket a
   /// stream id object and passes itself to the callback functor. The session
@@ -38,7 +40,10 @@ namespace tcp {
     using socket_type = boost::asio::ip::tcp::socket;
     using callback_function_type = std::function<void(std::shared_ptr<ServerSession>)>;
 
-    explicit ServerSession(boost::asio::io_service &io_service, time_duration timeout);
+    explicit ServerSession(
+        boost::asio::io_context &io_context,
+        time_duration timeout,
+        Server &server);
 
     /// Starts the session and calls @a on_opened after successfully reading the
     /// stream id, and @a on_closed once the session is closed.
@@ -53,7 +58,7 @@ namespace tcp {
     }
 
     template <typename... Buffers>
-    static auto MakeMessage(Buffers... buffers) {
+    static auto MakeMessage(Buffers &&... buffers) {
       static_assert(
           are_same<Buffer, Buffers...>::value,
           "This function only accepts arguments of type Buffer.");
@@ -65,7 +70,7 @@ namespace tcp {
 
     /// Writes some data to the socket.
     template <typename... Buffers>
-    void Write(Buffers... buffers) {
+    void Write(Buffers &&... buffers) {
       Write(MakeMessage(std::move(buffers)...));
     }
 
@@ -80,6 +85,8 @@ namespace tcp {
 
     friend class Server;
 
+    Server &_server;
+
     const size_t _session_id;
 
     stream_id_type _stream_id = 0u;
@@ -90,7 +97,7 @@ namespace tcp {
 
     boost::asio::deadline_timer _deadline;
 
-    boost::asio::io_service::strand _strand;
+    boost::asio::io_context::strand _strand;
 
     callback_function_type _on_closed;
 

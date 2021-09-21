@@ -11,8 +11,6 @@
 
 #include <exception>
 
-#include <exception>
-
 namespace carla {
 namespace client {
 
@@ -23,11 +21,11 @@ namespace client {
           "in the simulation:",
           GetDisplayId());
     }
-    if (IsListening()) {
+    if (IsListening() && GetEpisode().IsValid()) {
       try {
         Stop();
       } catch (const std::exception &e) {
-        log_error("excetion trying to stop sensor:", GetDisplayId(), ':', e.what());
+        log_error("exception trying to stop sensor:", GetDisplayId(), ':', e.what());
       }
     }
   }

@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include "Carla/Game/CarlaEpisode.h"
 #include "Carla/Sensor/DataStream.h"
+#include "Carla/Util/RandomEngine.h"
 
 #include "GameFramework/Actor.h"
 
@@ -22,7 +24,16 @@ class CARLA_API ASensor : public AActor
 
 public:
 
+  ASensor(const FObjectInitializer &ObjectInitializer);
+
+  void SetEpisode(const UCarlaEpisode &InEpisode)
+  {
+    Episode = &InEpisode;
+  }
+
   virtual void Set(const FActorDescription &Description);
+
+  virtual void BeginPlay();
 
   /// Replace the FDataStream associated with this sensor.
   ///
@@ -32,15 +43,48 @@ public:
     Stream = std::move(InStream);
   }
 
+  FDataStream MoveDataStream()
+  {
+    return std::move(Stream);
+  }
+
   /// Return the token that allows subscribing to this sensor's stream.
   auto GetToken() const
   {
     return Stream.GetToken();
   }
 
+  void Tick(const float DeltaTime) final;
+
+  virtual void PrePhysTick(float DeltaSeconds) {}
+  virtual void PostPhysTick(UWorld *World, ELevelTick TickType, float DeltaSeconds) {}
+
+  UFUNCTION(BlueprintCallable)
+  URandomEngine *GetRandomEngine()
+  {
+    return RandomEngine;
+  }
+
+  UFUNCTION(BlueprintCallable)
+  int32 GetSeed() const
+  {
+    return Seed;
+  }
+
+  UFUNCTION(BlueprintCallable)
+  void SetSeed(int32 InSeed);
+
 protected:
 
+  void PostActorCreated() override;
+
   void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+
+  const UCarlaEpisode &GetEpisode() const
+  {
+    check(Episode != nullptr);
+    return *Episode;
+  }
 
   /// Return the FDataStream associated with this sensor.
   ///
@@ -49,10 +93,27 @@ protected:
   template <typename SensorT>
   FAsyncDataStream GetDataStream(const SensorT &Self)
   {
-    return Stream.MakeAsyncDataStream(Self);
+    return Stream.MakeAsyncDataStream(Self, GetEpisode().GetElapsedGameTime());
   }
+
+  /// Seed of the pseudo-random engine.
+  UPROPERTY(Category = "Random Engine", EditAnywhere)
+  int32 Seed = 123456789;
+
+  /// Random Engine used to provide noise for sensor output.
+  UPROPERTY()
+  URandomEngine *RandomEngine = nullptr;
 
 private:
 
+  void PostPhysTickInternal(UWorld *World, ELevelTick TickType, float DeltaSeconds);
+
   FDataStream Stream;
+
+  FDelegateHandle OnPostTickDelegate;
+
+  const UCarlaEpisode *Episode = nullptr;
+
+  /// Allows the sensor to tick with the tick rate from UE4.
+  bool ReadyToTick = false;
 };

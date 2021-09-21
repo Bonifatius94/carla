@@ -8,6 +8,7 @@
 
 #include "carla/client/Actor.h"
 #include "carla/rpc/WalkerControl.h"
+#include "carla/rpc/WalkerBoneControl.h"
 
 namespace carla {
 namespace client {
@@ -16,11 +17,14 @@ namespace client {
   public:
 
     using Control = rpc::WalkerControl;
+    using BoneControl = rpc::WalkerBoneControl;
 
     explicit Walker(ActorInitializer init) : Actor(std::move(init)) {}
 
     /// Apply @a control to this Walker.
     void ApplyControl(const Control &control);
+
+    void ApplyControl(const BoneControl &bone_control);
 
     /// Return the control last applied to this Walker.
     ///

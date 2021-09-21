@@ -24,10 +24,8 @@ namespace data {
 
     friend Serializer;
 
-    explicit RawEpisodeState(RawData data)
-      : Super(std::move(data)) {
-      Super::SetOffset(Serializer::header_offset);
-    }
+    explicit RawEpisodeState(RawData &&data)
+      : Super(Serializer::header_offset, std::move(data)) {}
 
   private:
 
@@ -37,10 +35,15 @@ namespace data {
 
   public:
 
+    /// Unique id of the episode at which this data was generated.
+    uint64_t GetEpisodeId() const {
+      return GetHeader().episode_id;
+    }
+
     /// Simulation time-stamp, simulated seconds elapsed since the beginning of
     /// the current episode.
     double GetGameTimeStamp() const {
-      return GetHeader().game_timestamp;
+      return GetTimestamp();
     }
 
     /// Time-stamp of the frame at which this measurement was taken, in seconds
@@ -48,6 +51,21 @@ namespace data {
     double GetPlatformTimeStamp() const {
       return GetHeader().platform_timestamp;
     }
+
+    /// Simulated seconds elapsed since previous frame.
+    double GetDeltaSeconds() const {
+      return GetHeader().delta_seconds;
+    }
+
+    geom::Vector3DInt GetMapOrigin() const {
+      return GetHeader().map_origin;
+    }
+
+    /// Simulation state flags
+    Serializer::SimulationState GetSimulationState() const {
+      return GetHeader().simulation_state;
+    }
+
   };
 
 } // namespace data

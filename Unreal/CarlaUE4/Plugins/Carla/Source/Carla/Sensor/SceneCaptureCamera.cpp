@@ -7,6 +7,8 @@
 #include "Carla.h"
 #include "Carla/Sensor/SceneCaptureCamera.h"
 
+#include "Runtime/RenderCore/Public/RenderingThread.h"
+
 FActorDefinition ASceneCaptureCamera::GetSensorDefinition()
 {
   constexpr bool bEnableModifyingPostProcessEffects = true;
@@ -15,8 +17,15 @@ FActorDefinition ASceneCaptureCamera::GetSensorDefinition()
       bEnableModifyingPostProcessEffects);
 }
 
-void ASceneCaptureCamera::Tick(float DeltaTime)
+ASceneCaptureCamera::ASceneCaptureCamera(const FObjectInitializer &ObjectInitializer)
+  : Super(ObjectInitializer)
 {
-  Super::Tick(DeltaTime);
+  AddPostProcessingMaterial(
+      TEXT("Material'/Carla/PostProcessingMaterials/PhysicLensDistortion.PhysicLensDistortion'"));
+}
+
+void ASceneCaptureCamera::PostPhysTick(UWorld *World, ELevelTick TickType, float DeltaSeconds)
+{
+  TRACE_CPUPROFILER_EVENT_SCOPE(ASceneCaptureCamera::PostPhysTick);
   FPixelReader::SendPixelsInRenderThread(*this);
 }

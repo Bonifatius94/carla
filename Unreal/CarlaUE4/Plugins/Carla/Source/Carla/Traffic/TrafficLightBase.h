@@ -9,6 +9,7 @@
 #include "Traffic/TrafficSignBase.h"
 
 #include "Traffic/TrafficLightState.h"
+#include "Traffic/TrafficLightComponent.h"
 
 #include "TrafficLightBase.generated.h"
 
@@ -25,34 +26,17 @@ public:
 
   ATrafficLightBase(const FObjectInitializer &ObjectInitializer);
 
-  virtual void Tick(float DeltaSeconds) override;
-
-protected:
-
-  virtual void OnConstruction(const FTransform &Transform) override;
-
-#if WITH_EDITOR
-  virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
-
-#endif // WITH_EDITOR
-
-public:
-
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)
-  ETrafficLightState GetTrafficLightState() const
-  {
-    return State;
-  }
+  ETrafficLightState GetTrafficLightState() const;
 
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)
   void SetTrafficLightState(ETrafficLightState State);
 
-  /// Loop over traffic light states.
-  UFUNCTION(Category = "Traffic Light", BlueprintCallable)
-  void SwitchTrafficLightState();
-
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)
   void NotifyWheeledVehicle(ACarlaWheeledVehicle *Vehicle);
+
+  UFUNCTION(Category = "Traffic Light", BlueprintCallable)
+  void UnNotifyWheeledVehicle(ACarlaWheeledVehicle *Vehicle);
 
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)
   void SetGreenTime(float InGreenTime);
@@ -82,7 +66,29 @@ public:
   bool GetTimeIsFrozen() const;
 
   UFUNCTION(Category = "Traffic Light", BlueprintCallable)
-  int GetNumChanges() const;
+  void SetPoleIndex(int InPoleIndex);
+
+  UFUNCTION(Category = "Traffic Light", BlueprintCallable)
+  int GetPoleIndex() const;
+
+  UFUNCTION(Category = "Traffic Light", BlueprintCallable)
+  TArray<ATrafficLightBase *> GetGroupTrafficLights() const;
+
+  UFUNCTION(Category = "Traffic Light", BlueprintCallable)
+  void SetGroupTrafficLights(TArray<ATrafficLightBase *> InGroupTrafficLights);
+
+  // used from replayer
+  void SetElapsedTime(float InElapsedTime);
+
+  UFUNCTION(Category = "Traffic Light", BlueprintPure)
+  UTrafficLightComponent* GetTrafficLightComponent();
+
+  const UTrafficLightComponent* GetTrafficLightComponent() const;
+
+  // Compatibility old traffic light system with traffic light components
+  void LightChangedCompatibility(ETrafficLightState NewLightState);
+
+  void AddTimeToRecorder();
 
 protected:
 
@@ -91,27 +97,15 @@ protected:
 
 private:
 
-  UPROPERTY(Category = "Traffic Light", EditAnywhere)
-  ETrafficLightState State = ETrafficLightState::Red;
-
   UPROPERTY(Category = "Traffic Light", VisibleAnywhere)
   TArray<AWheeledVehicleAIController *> Vehicles;
 
-  UPROPERTY(Category = "Traffic Light", EditAnywhere)
-  float GreenTime = 10.0f;
-
-  UPROPERTY(Category = "Traffic Light", EditAnywhere)
-  float YellowTime = 2.0f;
-
-  UPROPERTY(Category = "Traffic Light", EditAnywhere)
-  float RedTime = 7.0f;
+  UPROPERTY(Category = "Traffic Light", VisibleAnywhere)
+  int PoleIndex = 0;
 
   UPROPERTY(Category = "Traffic Light", VisibleAnywhere)
-  float ElapsedTime = 0.0f;
+  TArray<ATrafficLightBase *> GroupTrafficLights;
 
   UPROPERTY(Category = "Traffic Light", EditAnywhere)
-  bool TimeIsFrozen = false;
-
-  UPROPERTY(Category = "Traffic Light", VisibleAnywhere)
-  int NumChanges = 0;
+  UTrafficLightComponent * TrafficLightComponent = nullptr;
 };

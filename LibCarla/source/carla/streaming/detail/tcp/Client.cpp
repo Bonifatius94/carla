@@ -15,6 +15,8 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/bind_executor.hpp>
 
 #include <exception>
 
@@ -32,7 +34,7 @@ namespace tcp {
   class IncomingMessage {
   public:
 
-    explicit IncomingMessage(Buffer buffer) : _message(std::move(buffer)) {}
+    explicit IncomingMessage(Buffer &&buffer) : _message(std::move(buffer)) {}
 
     boost::asio::mutable_buffer size_as_buffer() {
       return boost::asio::buffer(&_size, sizeof(_size));
@@ -64,16 +66,16 @@ namespace tcp {
   // ===========================================================================
 
   Client::Client(
-      boost::asio::io_service &io_service,
+      boost::asio::io_context &io_context,
       const token_type &token,
       callback_function_type callback)
     : LIBCARLA_INITIALIZE_LIFETIME_PROFILER(
           std::string("tcp client ") + std::to_string(token.get_stream_id())),
       _token(token),
       _callback(std::move(callback)),
-      _socket(io_service),
-      _strand(io_service),
-      _connection_timer(io_service),
+      _socket(io_context),
+      _strand(io_context),
+      _connection_timer(io_context),
       _buffer_pool(std::make_shared<BufferPool>()) {
     if (!_token.protocol_is_tcp()) {
       throw_exception(std::invalid_argument("invalid token, only TCP tokens supported"));
@@ -84,7 +86,7 @@ namespace tcp {
 
   void Client::Connect() {
     auto self = shared_from_this();
-    _strand.post([this, self]() {
+    boost::asio::post(_strand, [this, self]() {
       if (_done) {
         return;
       }
@@ -104,6 +106,9 @@ namespace tcp {
           if (_done) {
             return;
           }
+          // This forces not using Nagle's algorithm.
+          // Improves the sync mode velocity on Linux by a factor of ~3.
+          _socket.set_option(boost::asio::ip::tcp::no_delay(true));
           log_debug("streaming client: connected to", ep);
           // Send the stream id to subscribe to the stream.
           const auto &stream_id = _token.get_stream_id();
@@ -111,17 +116,21 @@ namespace tcp {
           boost::asio::async_write(
               _socket,
               boost::asio::buffer(&stream_id, sizeof(stream_id)),
-              _strand.wrap([=](error_code ec, size_t DEBUG_ONLY(bytes)) {
-            if (!ec) {
-              DEBUG_ASSERT_EQ(bytes, sizeof(stream_id));
-              // If succeeded start reading data.
-              ReadData();
-            } else {
-              // Else try again.
-              log_info("streaming client: failed to send stream id:", ec.message());
-              Connect();
-            }
-          }));
+              boost::asio::bind_executor(_strand, [=](error_code ec, size_t DEBUG_ONLY(bytes)) {
+                // Ensures to stop the execution once the connection has been stopped.
+                if (_done) {
+                  return;
+                }
+                if (!ec) {
+                  DEBUG_ASSERT_EQ(bytes, sizeof(stream_id));
+                  // If succeeded start reading data.
+                  ReadData();
+                } else {
+                  // Else try again.
+                  log_info("streaming client: failed to send stream id:", ec.message());
+                  Connect();
+                }
+              }));
         } else {
           log_info("streaming client: connection failed:", ec.message());
           Reconnect();
@@ -129,14 +138,14 @@ namespace tcp {
       };
 
       log_debug("streaming client: connecting to", ep);
-      _socket.async_connect(ep, _strand.wrap(handle_connect));
+      _socket.async_connect(ep, boost::asio::bind_executor(_strand, handle_connect));
     });
   }
 
   void Client::Stop() {
     _connection_timer.cancel();
     auto self = shared_from_this();
-    _strand.post([this, self]() {
+    boost::asio::post(_strand, [this, self]() {
       _done = true;
       if (_socket.is_open()) {
         _socket.close();
@@ -156,12 +165,12 @@ namespace tcp {
 
   void Client::ReadData() {
     auto self = shared_from_this();
-    _strand.post([this, self]() {
+    boost::asio::post(_strand, [this, self]() {
       if (_done) {
         return;
       }
 
-      log_debug("streaming client: Client::ReadData");
+      // log_debug("streaming client: Client::ReadData");
 
       auto message = std::make_shared<IncomingMessage>(_buffer_pool->Pop());
 
@@ -172,8 +181,8 @@ namespace tcp {
           DEBUG_ASSERT_NE(bytes, 0u);
           // Move the buffer to the callback function and start reading the next
           // piece of data.
-          log_debug("streaming client: success reading data, calling the callback");
-          _socket.get_io_service().post([self, message]() { self->_callback(message->pop()); });
+          // log_debug("streaming client: success reading data, calling the callback");
+          boost::asio::post(_strand, [self, message]() { self->_callback(message->pop()); });
           ReadData();
         } else {
           // As usual, if anything fails start over from the very top.
@@ -196,8 +205,8 @@ namespace tcp {
           boost::asio::async_read(
               _socket,
               message->buffer(),
-              _strand.wrap(handle_read_data));
-        } else {
+              boost::asio::bind_executor(_strand, handle_read_data));
+        } else if (!_done) {
           log_info("streaming client: failed to read header:", ec.message());
           DEBUG_ONLY(log_debug("size  = ", message->size()));
           DEBUG_ONLY(log_debug("bytes = ", bytes));
@@ -209,7 +218,7 @@ namespace tcp {
       boost::asio::async_read(
           _socket,
           message->size_as_buffer(),
-          _strand.wrap(handle_read_header));
+          boost::asio::bind_executor(_strand, handle_read_header));
     });
   }
 

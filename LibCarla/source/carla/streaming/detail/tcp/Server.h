@@ -10,8 +10,9 @@
 #include "carla/Time.h"
 #include "carla/streaming/detail/tcp/ServerSession.h"
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/post.hpp>
 
 #include <atomic>
 
@@ -20,7 +21,7 @@ namespace streaming {
 namespace detail {
 namespace tcp {
 
-  /// @warning This server cannot be destructed before its @a io_service is
+  /// @warning This server cannot be destructed before its @a io_context is
   /// stopped.
   class Server : private NonCopyable {
   public:
@@ -28,7 +29,11 @@ namespace tcp {
     using endpoint = boost::asio::ip::tcp::endpoint;
     using protocol_type = endpoint::protocol_type;
 
-    explicit Server(boost::asio::io_service &io_service, endpoint ep);
+    explicit Server(boost::asio::io_context &io_context, endpoint ep);
+
+    endpoint GetLocalEndpoint() const {
+      return _acceptor.local_endpoint();
+    }
 
     /// Set session time-out. Applies only to newly created sessions. By default
     /// the time-out is set to 10 seconds.
@@ -41,12 +46,20 @@ namespace tcp {
     /// is closed.
     template <typename FunctorT1, typename FunctorT2>
     void Listen(FunctorT1 on_session_opened, FunctorT2 on_session_closed) {
-      _acceptor.get_io_service().post([=]() {
+      boost::asio::post(_io_context, [=]() {
         OpenSession(
             _timeout,
             std::move(on_session_opened),
             std::move(on_session_closed));
       });
+    }
+
+    void SetSynchronousMode(bool is_synchro) {
+      _synchronous = is_synchro;
+    }
+
+    bool IsSynchronousMode() const {
+      return _synchronous;
     }
 
   private:
@@ -56,9 +69,13 @@ namespace tcp {
         ServerSession::callback_function_type on_session_opened,
         ServerSession::callback_function_type on_session_closed);
 
+    boost::asio::io_context &_io_context;
+
     boost::asio::ip::tcp::acceptor _acceptor;
 
     std::atomic<time_duration> _timeout;
+
+    bool _synchronous;
   };
 
 } // namespace tcp

@@ -8,6 +8,7 @@
 
 #include <carla/geom/Vector3D.h>
 #include <carla/geom/Math.h>
+#include <carla/geom/BoundingBox.h>
 #include <carla/geom/Transform.h>
 #include <limits>
 
@@ -56,6 +57,53 @@ TEST(geom, single_point_translation) {
   ASSERT_NEAR(point.y, result_point.y, error);
   ASSERT_NEAR(point.z, result_point.z, error);
 }
+
+
+TEST(geom, single_point_transform_inverse_transform_coherence) {
+  constexpr double error = 0.001;
+
+  const Location point(-3.14f, 1.337f, 4.20f);
+  const Location translation (1.41f, -4.7f, 9.2f);
+  const Rotation rotation (-47.0f, 37.0f, 250.2f);
+  const Transform transform (translation, rotation);
+
+  auto transformed_point = point;
+  transform.TransformPoint(transformed_point);
+
+  auto point_back_to_normal = transformed_point;
+  transform.InverseTransformPoint(point_back_to_normal);
+
+  ASSERT_NEAR(point.x, point_back_to_normal.x, error) << "result.x is " << point_back_to_normal.x << " but expected " << point.x;
+  ASSERT_NEAR(point.y, point_back_to_normal.y, error) << "result.y is " << point_back_to_normal.y << " but expected " << point.y;
+  ASSERT_NEAR(point.z, point_back_to_normal.z, error) << "result.z is " << point_back_to_normal.z << " but expected " << point.z;
+}
+
+
+TEST(geom, bbox_get_local_vertices_get_world_vertices_coherence) {
+  constexpr double error = 0.001;
+
+  const BoundingBox bbox (Location(10.2f, -32.4f, 15.6f), Vector3D(9.2f, 13.5f, 20.3f));
+
+  const Location bbox_location(-3.14f, 1.337f, 4.20f);
+  const Rotation bbox_rotation (-59.0f, 17.0f, -650.2f);
+  const Transform bbox_transform(bbox_location, bbox_rotation);
+
+  const auto local_vertices = bbox.GetLocalVertices();
+  const auto world_vertices = bbox.GetWorldVertices(bbox_transform);
+  for (auto i = 0u; i < local_vertices.size(); ++i){
+      const auto &local_vertex = local_vertices[i];
+
+      auto transformed_local_vertex = local_vertex;
+      bbox_transform.TransformPoint(transformed_local_vertex);
+
+      const auto &world_vertex = world_vertices[i];
+
+      ASSERT_NEAR(transformed_local_vertex.x, world_vertex.x, error) << "result.x is " << transformed_local_vertex.x << " but expected " << world_vertex.x;
+      ASSERT_NEAR(transformed_local_vertex.y, world_vertex.y, error) << "result.y is " << transformed_local_vertex.y << " but expected " << world_vertex.y;
+      ASSERT_NEAR(transformed_local_vertex.z, world_vertex.z, error) << "result.z is " << transformed_local_vertex.z << " but expected " << world_vertex.z;
+  }
+}
+
 
 TEST(geom, single_point_rotation) {
   constexpr double error = 0.001;
@@ -135,7 +183,7 @@ TEST(geom, nearest_point_segment) {
     double min_dist = std::numeric_limits<double>::max();
     int id = -1;
     for (int j = 0; j < 40; j += 4) {
-      const double dist = Math::DistSegmentPoint(
+      const double dist = Math::DistanceSegmentToPoint(
           point[i],
           {segment[j + 0], segment[j + 1], 0},
           {segment[j + 2], segment[j + 3], 0}).second;
@@ -169,52 +217,13 @@ TEST(geom, forward_vector) {
   compare({180.0f, -90.0f,   0.0f}, {0.0f, 1.0f, 0.0f});
 }
 
-TEST(geom, point_in_rectangle) {
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(0, 0, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(1, 1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(-1, 1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(1, -1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(-1, -1, 0)));
-  ASSERT_FALSE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(-1.01, -1.01, 0)));
-  ASSERT_FALSE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), 0, Vector3D(1.01, 1.01, 0)));
-  ASSERT_FALSE(Math::PointInRectangle(
-      Vector3D(1.5, 1.5, 0), Vector3D(1, 1, 0), 0, Vector3D(0, 0, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(1.5, 1.5, 0), Vector3D(1, 1, 0), 0, Vector3D(1, 1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(1.5, 1.5, 0), Vector3D(1, 1, 0), 0, Vector3D(2, 1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(1.5, 1.5, 0), Vector3D(1, 1, 0), 0, Vector3D(2, 1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(1.5, 1.5, 0), Vector3D(1, 1, 0), 0, Vector3D(2, 2, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(1.5, 1.5, 0), Vector3D(1, 1, 0), 0, Vector3D(1, 1, 0)));
-  ASSERT_FALSE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), Math::pi_half() * 0.5, Vector3D(1, 1, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 0, 0), Vector3D(1, 1, 0), Math::pi_half() * 0.5, Vector3D(1, 0, 0)));
-  ASSERT_TRUE(Math::PointInRectangle(
-      Vector3D(0, 2, 0), Vector3D(0.5, 2, 0), Math::pi_half(), Vector3D(2, 2, 0)));
-  ASSERT_FALSE(Math::PointInRectangle(
-      Vector3D(0, 2, 0), Vector3D(0.5, 2, 0), Math::pi_half(), Vector3D(2.1, 2, 0)));
-  ASSERT_FALSE(Math::PointInRectangle(
-      Vector3D(0, 2, 0), Vector3D(0.5, 2, 0), Math::pi_half(), Vector3D(2, 2.6, 0)));
-}
-
 TEST(geom, nearest_point_arc) {
-  ASSERT_NEAR(Math::DistArcPoint(Vector3D(1,0,0),
-      Vector3D(0,0,0), 1.57, 0, 1).second, 0.414214, 0.01);
-  ASSERT_NEAR(Math::DistArcPoint(Vector3D(2,-1,0),
-      Vector3D(0,0,0), 1.57, 0, 1).second, 1.0, 0.01);
-  ASSERT_NEAR(Math::DistArcPoint(Vector3D(0,-1,0),
-      Vector3D(0,0,0), 1.57, 0, 1).second, 1.0, 0.01);
-  ASSERT_NEAR(Math::DistArcPoint(Vector3D(1,-2,0),
-      Vector3D(0,0,0), 1.57, 0, 1).second, 1.0, 0.01);
+  ASSERT_NEAR(Math::DistanceArcToPoint(Vector3D(1,0,0),
+      Vector3D(0,0,0), 1.57f, 0, 1).second, 0.414214f, 0.01f);
+  ASSERT_NEAR(Math::DistanceArcToPoint(Vector3D(2,1,0),
+      Vector3D(0,0,0), 1.57f, 0, 1).second, 1.0f, 0.01f);
+  ASSERT_NEAR(Math::DistanceArcToPoint(Vector3D(0,1,0),
+      Vector3D(0,0,0), 1.57f, 0, 1).second, 1.0f, 0.01f);
+  ASSERT_NEAR(Math::DistanceArcToPoint(Vector3D(1,2,0),
+      Vector3D(0,0,0), 1.57f, 0, 1).second, 1.0f, 0.01f);
 }

@@ -9,9 +9,12 @@
 #include "carla/Iterator.h"
 #include "carla/ListView.h"
 #include "carla/NonCopyable.h"
+#include "carla/client/ActorSnapshot.h"
 #include "carla/client/Timestamp.h"
-#include "carla/sensor/data/ActorDynamicState.h"
+#include "carla/geom/Vector3DInt.h"
 #include "carla/sensor/data/RawEpisodeState.h"
+
+#include <boost/optional.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -22,47 +25,94 @@ namespace detail {
 
   /// Represents the state of all the actors of an episode at a given frame.
   class EpisodeState
-    : std::enable_shared_from_this<EpisodeState>,
+    : public std::enable_shared_from_this<EpisodeState>,
       private NonCopyable {
+
+      using SimulationState = sensor::s11n::EpisodeStateSerializer::SimulationState;
+
   public:
 
-    struct ActorState {
-      geom::Transform transform;
-      geom::Vector3D velocity;
-      geom::Vector3D angular_velocity;
-      geom::Vector3D acceleration;
-      sensor::data::ActorDynamicState::TypeDependentState state;
-    };
+    explicit EpisodeState(uint64_t episode_id) : _episode_id(episode_id) {}
+
+    explicit EpisodeState(const sensor::data::RawEpisodeState &state);
+
+    auto GetEpisodeId() const {
+      return _episode_id;
+    }
+
+    auto GetFrame() const {
+      return _timestamp.frame;
+    }
 
     const auto &GetTimestamp() const {
       return _timestamp;
     }
 
-    ActorState GetActorState(actor_id_type id) const {
-      ActorState state;
-      auto it = _actors.find(id);
-      if (it != _actors.end()) {
-        state = it->second;
-      } else {
-        log_debug("actor", id, "not found in episode");
-      }
+    SimulationState GetsimulationState() const {
+      return _simulation_state;
+    }
+
+    bool HasMapChanged() const {
+      return (_simulation_state & SimulationState::MapChange) != SimulationState::None;
+    }
+
+    bool IsLightUpdatePending() const {
+      return (_simulation_state & SimulationState::PendingLightUpdate)  != 0;
+    }
+
+    bool ContainsActorSnapshot(ActorId actor_id) const {
+      return _actors.find(actor_id) != _actors.end();
+    }
+
+    ActorSnapshot GetActorSnapshot(ActorId id) const {
+      ActorSnapshot state;
+      CopyActorSnapshotIfPresent(id, state);
+      return state;
+    }
+
+    boost::optional<ActorSnapshot> GetActorSnapshotIfPresent(ActorId id) const {
+      boost::optional<ActorSnapshot> state;
+      CopyActorSnapshotIfPresent(id, state);
       return state;
     }
 
     auto GetActorIds() const {
       return MakeListView(
-          iterator::make_map_keys_iterator(_actors.begin()),
-          iterator::make_map_keys_iterator(_actors.end()));
+          iterator::make_map_keys_const_iterator(_actors.begin()),
+          iterator::make_map_keys_const_iterator(_actors.end()));
     }
 
-    std::shared_ptr<const EpisodeState> DeriveNextStep(
-        const sensor::data::RawEpisodeState &state) const;
+    size_t size() const {
+      return _actors.size();
+    }
+
+    auto begin() const {
+      return iterator::make_map_values_const_iterator(_actors.begin());
+    }
+
+    auto end() const {
+      return iterator::make_map_values_const_iterator(_actors.end());
+    }
 
   private:
 
-    Timestamp _timestamp;
+    template <typename T>
+    void CopyActorSnapshotIfPresent(ActorId id, T &value) const {
+      auto it = _actors.find(id);
+      if (it != _actors.end()) {
+        value = it->second;
+      }
+    }
 
-    std::unordered_map<actor_id_type, ActorState> _actors;
+    const uint64_t _episode_id;
+
+    const Timestamp _timestamp;
+
+    geom::Vector3DInt _map_origin;
+
+    SimulationState _simulation_state;
+
+    std::unordered_map<ActorId, ActorSnapshot> _actors;
   };
 
 } // namespace detail

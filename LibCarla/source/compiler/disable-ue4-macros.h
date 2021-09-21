@@ -40,7 +40,7 @@
 // http://nadeausoftware.com/articles/2012/10/c_c_tip_how_detect_compiler_name_and_version_using_compiler_predefined_macros
 #if defined(_MSC_VER)
 #  pragma warning(push)
-#  pragma warning(disable: 4668 4191)
+#  pragma warning(disable: 4668 4191 4647)
 #endif
 
 #if defined(__clang__)
@@ -48,6 +48,7 @@
 #  pragma clang diagnostic ignored "-Wmissing-braces"
 #  pragma clang diagnostic ignored "-Wunusable-partial-specialization"
 #  pragma clang diagnostic ignored "-Wundef"
+#  pragma clang diagnostic ignored "-Wall"
 #endif
 
 #pragma push_macro("TEXT")
@@ -55,3 +56,6 @@
 
 #pragma push_macro("check")
 #undef check
+
+#pragma push_macro("PI")
+#undef PI

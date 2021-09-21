@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Computer Vision Center (CVC) at the Universitat Autonoma
+// Copyright (c) 2019 Computer Vision Center (CVC) at the Universitat Autonoma
 // de Barcelona (UAB).
 //
 // This work is licensed under the terms of the MIT license.
@@ -9,6 +9,7 @@
 #include "carla/Debug.h"
 #include "carla/sensor/data/Array.h"
 #include "carla/sensor/s11n/ImageSerializer.h"
+#include "carla/sensor/s11n/OpticalFlowImageSerializer.h"
 
 namespace carla {
 namespace sensor {
@@ -16,15 +17,17 @@ namespace data {
 
   /// Templated image for any type of pixel.
   template <typename PixelT>
-  class ImageTmpl : public Array<PixelT>  {
+  class ImageTmpl : public Array<PixelT> {
     using Super = Array<PixelT>;
   protected:
 
     using Serializer = s11n::ImageSerializer;
+    using SerializerOpticalFlow = s11n::OpticalFlowImageSerializer;
 
     friend Serializer;
+    friend SerializerOpticalFlow;
 
-    explicit ImageTmpl(RawData data)
+    explicit ImageTmpl(RawData &&data)
       : Super(Serializer::header_offset, std::move(data)) {
       DEBUG_ASSERT(GetWidth() * GetHeight() == Super::size());
     }

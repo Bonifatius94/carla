@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Computer Vision Center (CVC) at the Universitat Autonoma
+// Copyright (c) 2019 Computer Vision Center (CVC) at the Universitat Autonoma
 // de Barcelona (UAB).
 //
 // This work is licensed under the terms of the MIT license.
@@ -11,12 +11,16 @@
 #include "Carla/Actor/PedestrianParameters.h"
 #include "Carla/Actor/PropParameters.h"
 #include "Carla/Actor/VehicleParameters.h"
+#include "Carla/Sensor/GnssSensor.h"
+#include "Carla/Sensor/Radar.h"
+#include "Carla/Sensor/InertialMeasurementUnit.h"
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "ActorBlueprintFunctionLibrary.generated.h"
 
 class ASceneCaptureSensor;
+class AShaderBasedSensor;
 struct FLidarDescription;
 
 UCLASS()
@@ -26,6 +30,7 @@ class UActorBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 
 public:
 
+  /// @}
   /// ==========================================================================
   /// @name Actor definition validators
   /// ==========================================================================
@@ -45,6 +50,11 @@ public:
   /// @name Helpers to create actor definitions
   /// ==========================================================================
   /// @{
+
+  static FActorDefinition MakeGenericDefinition(
+      const FString &Category,
+      const FString &Type,
+      const FString &Id);
 
   static FActorDefinition MakeGenericSensorDefinition(
       const FString &Type,
@@ -67,6 +77,27 @@ public:
   UFUNCTION(Category = "Carla Actor", BlueprintCallable)
   static void MakeLidarDefinition(
       const FString &Id,
+      bool &Success,
+      FActorDefinition &Definition);
+
+  static FActorDefinition MakeGnssDefinition();
+
+  UFUNCTION(Category = "Carla Actor", BlueprintCallable)
+  static void MakeGnssDefinition(
+      bool &Success,
+      FActorDefinition &Definition);
+
+  static FActorDefinition MakeIMUDefinition();
+
+  UFUNCTION(Category = "Carla Actor", BlueprintCallable)
+  static void MakeIMUDefinition(
+      bool &Success,
+      FActorDefinition &Definition);
+
+  static FActorDefinition MakeRadarDefinition();
+
+  UFUNCTION(Category = "Carla Actor", BlueprintCallable)
+  static void MakeRadarDefinition(
       bool &Success,
       FActorDefinition &Definition);
 
@@ -93,6 +124,17 @@ public:
       TArray<FActorDefinition> &Definitions);
 
   UFUNCTION(Category = "Carla Actor", BlueprintCallable)
+  static void MakeTriggerDefinitions(
+      const TArray<FString> &ParameterArray,
+      TArray<FActorDefinition> &Definitions);
+
+  UFUNCTION(Category = "Carla Actor", BlueprintCallable)
+  static void MakeTriggerDefinition(
+      const FString &Id,
+      bool &Success,
+      FActorDefinition &Definition);
+
+  UFUNCTION(Category = "Carla Actor", BlueprintCallable)
   static void MakePropDefinition(
       const FPropParameters &Parameters,
       bool &Success,
@@ -105,9 +147,9 @@ public:
 
   UFUNCTION()
   static void MakeObstacleDetectorDefinitions(
-    const FString &Type,
-    const FString &Id,
-    FActorDefinition &Definition);
+      const FString &Type,
+      const FString &Id,
+      FActorDefinition &Definition);
 
   /// @}
   /// ==========================================================================
@@ -168,9 +210,13 @@ public:
 
   UFUNCTION(Category = "Carla Actor", BlueprintCallable)
   static void SetCamera(const FActorDescription &Description, ASceneCaptureSensor *Camera);
+  static void SetCamera(const FActorDescription &Description, AShaderBasedSensor *Camera);
 
   static void SetLidar(const FActorDescription &Description, FLidarDescription &Lidar);
 
-  /// @}
-};
+  static void SetGnss(const FActorDescription &Description, AGnssSensor *Gnss);
 
+  static void SetIMU(const FActorDescription &Description, AInertialMeasurementUnit *IMU);
+
+  static void SetRadar(const FActorDescription &Description, ARadar *Radar);
+};

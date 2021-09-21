@@ -9,9 +9,12 @@
 #include <carla/streaming/Client.h>
 #include <carla/streaming/Server.h>
 
+#include <boost/asio/post.hpp>
+
 #include <algorithm>
 
 using namespace carla::streaming;
+using namespace std::chrono_literals;
 
 static auto make_special_message(size_t size) {
   std::vector<uint32_t> v(size/sizeof(uint32_t), 42u);
@@ -37,7 +40,7 @@ public:
     _client.Subscribe(stream.token(), [this](carla::Buffer DEBUG_ONLY(msg)) {
       DEBUG_ASSERT_EQ(msg.size(), _message.size());
       DEBUG_ASSERT(msg == _message);
-      _client_callback.post([this]() {
+      boost::asio::post(_client_callback, [this]() {
         CARLA_PROFILE_FPS(client, listen_callback);
         ++_number_of_messages_received;
       });
@@ -110,9 +113,9 @@ private:
 
   const carla::Buffer _message;
 
-  boost::asio::io_service _client_callback;
+  boost::asio::io_context _client_callback;
 
-  boost::asio::io_service::work _work_to_do;
+  boost::asio::io_context::work _work_to_do;
 
   const double _success_ratio;
 

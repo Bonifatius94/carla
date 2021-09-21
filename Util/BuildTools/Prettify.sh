@@ -19,11 +19,9 @@ PRETTIFY_FILE=false
 
 OPTS=`getopt -o hf: --long help,all,file: -n 'parse-options' -- "$@"`
 
-if [ $? != 0 ] ; then echo "$USAGE_STRING" ; exit 2 ; fi
-
 eval set -- "$OPTS"
 
-while true; do
+while [[ $# -gt 0 ]]; do
   case "$1" in
     --all )
       PRETTIFY_ALL=true;
@@ -37,7 +35,7 @@ while true; do
       exit 1
       ;;
     * )
-      break ;;
+      shift ;;
   esac
 done
 
@@ -59,7 +57,7 @@ fi
 mkdir -p ${CARLA_BUILD_FOLDER}
 pushd ${CARLA_BUILD_FOLDER} >/dev/null
 
-UNCRUSTIFY_BASENAME=uncrustify-0.67
+UNCRUSTIFY_BASENAME=uncrustify-0.69.0
 
 UNCRUSTIFY=${PWD}/${UNCRUSTIFY_BASENAME}-install/bin/uncrustify
 
@@ -70,7 +68,7 @@ else
 
   log "Retrieving Uncrustify."
 
-  git clone --depth=1 -b uncrustify-0.67 https://github.com/uncrustify/uncrustify.git ${UNCRUSTIFY_BASENAME}-source
+  git clone --depth=1 -b ${UNCRUSTIFY_BASENAME} https://github.com/uncrustify/uncrustify.git ${UNCRUSTIFY_BASENAME}-source
 
   log "Building Uncrustify."
 

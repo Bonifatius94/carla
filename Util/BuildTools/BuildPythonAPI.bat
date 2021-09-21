@@ -5,7 +5,7 @@ rem BAT script that creates the client python api of LibCarla (carla.org).
 rem Run it through a cmd with the x64 Visual C++ Toolset enabled.
 
 set LOCAL_PATH=%~dp0
-set "FILE_N=-[%~n0]:"
+set FILE_N=-[%~n0]:
 
 rem Print batch params (debug purpose)
 echo %FILE_N% [Batch params]: %*
@@ -25,7 +25,8 @@ set BUILD_FOR_PYTHON3=false
 if not "%1"=="" (
     if "%1"=="--rebuild" (
         set REMOVE_INTERMEDIATE=true
-        set BUILD_FOR_PYTHON2=true
+        rem We don't provide support for py2 right now
+        set BUILD_FOR_PYTHON2=false
         set BUILD_FOR_PYTHON3=true
     )
 
@@ -58,9 +59,7 @@ if not "%1"=="" (
     goto :arg-parse
 )
 
-set PYTHON_LIB_PATH=%ROOT_PATH%PythonAPI\
-set PYTHON_LIB_BUILD=%PYTHON_LIB_PATH%build\
-set PYTHON_LIB_DEPENDENCIES=%PYTHON_LIB_PATH%dependencies\
+set PYTHON_LIB_PATH=%ROOT_PATH:/=\%PythonAPI\carla\
 
 if %REMOVE_INTERMEDIATE% == false (
     if %BUILD_FOR_PYTHON3% == false (
@@ -72,14 +71,22 @@ if %REMOVE_INTERMEDIATE% == false (
 )
 
 if %REMOVE_INTERMEDIATE% == true (
-    echo %FILE_N% Cleaning "%PYTHON_LIB_BUILD%"
-    if exist "%PYTHON_LIB_BUILD%" rmdir /S /Q "%PYTHON_LIB_BUILD%"
-
-    echo %FILE_N% Cleaning "%PYTHON_LIB_DEPENDENCIES%"
-    if exist "%PYTHON_LIB_DEPENDENCIES%" rmdir /S /Q "%PYTHON_LIB_DEPENDENCIES%"
-
-    echo %FILE_N% Cleaning "%PYTHON_LIB_PATH%dist"
-    if exist "%PYTHON_LIB_PATH%dist" rmdir /S /Q "%PYTHON_LIB_PATH%dist"
+    rem Remove directories
+    for %%G in (
+        "%PYTHON_LIB_PATH%build",
+        "%PYTHON_LIB_PATH%dist",
+        "%PYTHON_LIB_PATH%source\carla.egg-info"
+    ) do (
+        if exist %%G (
+            echo %FILE_N% Cleaning %%G
+            rmdir /s/q %%G
+        )
+    )
+    if %BUILD_FOR_PYTHON3% == false (
+        if %BUILD_FOR_PYTHON2% == false (
+            goto good_exit
+        )
+    )
 )
 
 cd "%PYTHON_LIB_PATH%"
@@ -98,12 +105,12 @@ if %BUILD_FOR_PYTHON2%==true (
     goto py2_not_supported
 )
 
-rem Build for Python 2
+rem Build for Python 3
 rem
 if %BUILD_FOR_PYTHON3%==true (
     echo Building Python API for Python 3.
-    call py -3 setup.py bdist_egg
-    if %errorlevel% neq 0 goto error_build_egg
+    py -3 setup.py bdist_egg bdist_wheel
+    if %errorlevel% neq 0 goto error_build_wheel
 )
 
 goto success
@@ -132,12 +139,13 @@ rem ============================================================================
     echo %FILE_N% [ERROR] An error ocurred while executing the py.
     echo %FILE_N% [ERROR] Possible causes:
     echo %FILE_N% [ERROR]  - Make sure "py" is installed.
+    echo %FILE_N% [ERROR]  - py = python launcher. This utility is bundled with Python installation but not installed by default.
     echo %FILE_N% [ERROR]  - Make sure it is available on your Windows "py".
     goto bad_exit
 
-:error_build_egg
+:error_build_wheel
     echo.
-    echo %FILE_N% [ERROR] An error occurred while building the egg file.
+    echo %FILE_N% [ERROR] An error occurred while building the wheel file.
     goto bad_exit
 
 :good_exit
@@ -147,3 +155,4 @@ rem ============================================================================
 :bad_exit
     endlocal
     exit /b %errorlevel%
+

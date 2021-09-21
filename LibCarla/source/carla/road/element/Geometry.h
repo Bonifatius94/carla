@@ -6,12 +6,10 @@
 
 #pragma once
 
-#include "carla/Debug.h"
 #include "carla/geom/Location.h"
 #include "carla/geom/Math.h"
-#include "carla/road/element/cephes/fresnel.h"
-
-#include <cmath>
+#include "carla/geom/CubicPolynomial.h"
+#include "carla/geom/Rtree.h"
 
 namespace carla {
 namespace road {
@@ -20,7 +18,9 @@ namespace element {
   enum class GeometryType : unsigned int {
     LINE,
     ARC,
-    SPIRAL
+    SPIRAL,
+    POLY3,
+    POLY3PARAM
   };
 
   struct DirectedPoint {
@@ -31,28 +31,15 @@ namespace element {
     DirectedPoint(const geom::Location &l, double t)
       : location(l),
         tangent(t) {}
-    DirectedPoint(double x, double y, double z, double t)
+    DirectedPoint(float x, float y, float z, double t)
       : location(x, y, z),
         tangent(t) {}
 
-    geom::Location location = {0, 0, 0};
+    geom::Location location = {0.0f, 0.0f, 0.0f};
     double tangent = 0.0; // [radians]
     double pitch = 0.0;   // [radians]
-    bool valid = true;
 
-    static DirectedPoint Invalid() {
-      DirectedPoint d;
-      d.valid = false;
-      return d;
-    }
-
-    void ApplyLateralOffset(double lateral_offset) {
-      /// @todo Z axis??
-      auto normal_x =  std::sin(tangent);
-      auto normal_y = -std::cos(tangent);
-      location.x += lateral_offset * normal_x;
-      location.y += lateral_offset * normal_y;
-    }
+    void ApplyLateralOffset(float lateral_offset);
 
     friend bool operator==(const DirectedPoint &lhs, const DirectedPoint &rhs) {
       return (lhs.location == rhs.location) && (lhs.tangent == rhs.tangent);
@@ -81,9 +68,9 @@ namespace element {
 
     virtual ~Geometry() = default;
 
-    virtual const DirectedPoint PosFromDist(double dist) const = 0;
+    virtual DirectedPoint PosFromDist(double dist) const = 0;
 
-    virtual std::pair<double, double> DistanceTo(const geom::Location &p) const = 0;
+    virtual std::pair<float, float> DistanceTo(const geom::Location &p) const = 0;
 
   protected:
 
@@ -97,8 +84,7 @@ namespace element {
         _length(length),
         _start_position_offset(start_offset),
         _heading(heading),
-        _start_position(start_pos)
-    {}
+        _start_position(start_pos) {}
 
   protected:
 
@@ -111,7 +97,7 @@ namespace element {
     geom::Location _start_position; // [meters]
   };
 
-  class GeometryLine : public Geometry {
+  class GeometryLine final : public Geometry {
   public:
 
     GeometryLine(
@@ -121,22 +107,16 @@ namespace element {
         const geom::Location &start_pos)
       : Geometry(GeometryType::LINE, start_offset, length, heading, start_pos) {}
 
-    const DirectedPoint PosFromDist(const double dist) const override {
-      assert(dist > 0);
-      assert(_length > 0.0);
-      DirectedPoint p(_start_position, _heading);
-      p.location.x += dist * std::cos(p.tangent);
-      p.location.y += dist * std::sin(p.tangent);
-      return p;
-    }
+    DirectedPoint PosFromDist(double dist) const override;
 
     /// Returns a pair containing:
     /// - @b first:  distance to the nearest point in this line from the
-    ///              begining of the shape.
-    /// - @b second: Euclidean distance from the nearest point in this line to p.
+    ///              beginning of the shape.
+    /// - @b second: Euclidean distance from the nearest point in this line to
+    /// p.
     ///   @param p point to calculate the distance
-    std::pair<double, double> DistanceTo(const geom::Location &p) const override {
-      return geom::Math::DistSegmentPoint(
+    std::pair<float, float> DistanceTo(const geom::Location &p) const override {
+      return geom::Math::DistanceSegmentToPoint(
           p,
           _start_position,
           PosFromDist(_length).location);
@@ -144,7 +124,7 @@ namespace element {
 
   };
 
-  class GeometryArc : public Geometry {
+  class GeometryArc final : public Geometry {
   public:
 
     GeometryArc(
@@ -156,35 +136,23 @@ namespace element {
       : Geometry(GeometryType::ARC, start_offset, length, heading, start_pos),
         _curvature(curv) {}
 
-    const DirectedPoint PosFromDist(double dist) const override {
-      assert(dist > 0);
-      assert(_length > 0.0);
-      assert(std::fabs(_curvature) > 1e-15);
-      const double radius = 1.0 / _curvature;
-      DirectedPoint p(_start_position, _heading);
-      p.location.x -= radius * std::cos(p.tangent + geom::Math::pi_half());
-      p.location.y -= radius * std::sin(p.tangent + geom::Math::pi_half());
-      p.tangent -= dist * _curvature;
-      p.location.x += radius * std::cos(p.tangent + geom::Math::pi_half());
-      p.location.y += radius * std::sin(p.tangent + geom::Math::pi_half());
-      return p;
-    }
+    DirectedPoint PosFromDist(double dist) const override;
 
     /// Returns a pair containing:
     /// - @b first:  distance to the nearest point in this arc from the
-    ///              begining of the shape.
+    ///              beginning of the shape.
     /// - @b second: Euclidean distance from the nearest point in this arc to p.
     ///   @param p point to calculate the distance
-    std::pair<double, double> DistanceTo(const geom::Location &p) const override {
-      return geom::Math::DistArcPoint(
+    std::pair<float, float> DistanceTo(const geom::Location &p) const override {
+      return geom::Math::DistanceArcToPoint(
           p,
           _start_position,
-          _length,
-          _heading,
-          _curvature);
+          static_cast<float>(_length),
+          static_cast<float>(_heading),
+          static_cast<float>(_curvature));
     }
 
-    double GetCurvature() {
+    double GetCurvature() const {
       return _curvature;
     }
 
@@ -193,7 +161,7 @@ namespace element {
     double _curvature;
   };
 
-  class GeometrySpiral : public Geometry {
+  class GeometrySpiral final : public Geometry {
   public:
 
     GeometrySpiral(
@@ -215,39 +183,161 @@ namespace element {
       return _curve_end;
     }
 
-    const DirectedPoint PosFromDist(double dist) const override {
-      // not working yet with negative values
-      assert(dist > 0);
-      assert(_length > 0.0);
-      assert(std::fabs(_curve_end) > 1e-15);
-      const double radius = 1.0 / _curve_end;
-      const double extra_norm = 1.0 / std::sqrt(geom::Math::pi_half());
-      const double norm = 1.0 / std::sqrt(2.0 * radius * _length);
-      const double length = dist * norm;
-      double S, C;
-      fresnl(length * extra_norm, &S, &C);
-      S /= (norm * extra_norm);
-      C /= (norm * extra_norm);
-      DirectedPoint p(_start_position, _heading);
-      const double cos_a = std::cos(p.tangent);
-      const double sin_a = std::sin(p.tangent);
-      p.location.x += C * cos_a - S * sin_a;
-      p.location.y += S * cos_a + C * sin_a;
-      p.tangent += length * length;
+    DirectedPoint PosFromDist(double dist) const override;
 
-      return p;
-    }
-
-    /// @todo
-    std::pair<double, double> DistanceTo(const geom::Location &) const override {
-      DEBUG_ERROR;
-      return {0.0, 0.0};
-    }
+    std::pair<float, float> DistanceTo(const geom::Location &) const override;
 
   private:
 
     double _curve_start;
     double _curve_end;
+  };
+
+  class GeometryPoly3 final : public Geometry {
+  public:
+
+    GeometryPoly3(
+        double start_offset,
+        double length,
+        double heading,
+        const geom::Location &start_pos,
+        double a,
+        double b,
+        double c,
+        double d)
+      : Geometry(GeometryType::POLY3, start_offset, length, heading, start_pos),
+        _a(a),
+        _b(b),
+        _c(c),
+        _d(d) {
+      _poly.Set(a, b, c, d);
+      PreComputeSpline();
+    }
+
+    double Geta() const {
+      return _a;
+    }
+    double Getb() const {
+      return _b;
+    }
+    double Getc() const {
+      return _c;
+    }
+    double Getd() const {
+      return _d;
+    }
+
+    DirectedPoint PosFromDist(double dist) const override;
+
+    std::pair<float, float> DistanceTo(const geom::Location &) const override;
+
+  private:
+
+    geom::CubicPolynomial _poly;
+
+    double _a;
+    double _b;
+    double _c;
+    double _d;
+
+    struct RtreeValue {
+      double u = 0;
+      double v = 0;
+      double s = 0;
+      double t = 0;
+    };
+    using Rtree = geom::SegmentCloudRtree<RtreeValue, 1>;
+    using TreeElement = Rtree::TreeElement;
+    Rtree _rtree;
+    void PreComputeSpline();
+  };
+
+  class GeometryParamPoly3 final : public Geometry {
+  public:
+
+    GeometryParamPoly3(
+        double start_offset,
+        double length,
+        double heading,
+        const geom::Location &start_pos,
+        double aU,
+        double bU,
+        double cU,
+        double dU,
+        double aV,
+        double bV,
+        double cV,
+        double dV,
+        bool arcLength)
+      : Geometry(GeometryType::POLY3PARAM, start_offset, length, heading, start_pos),
+        _aU(aU),
+        _bU(bU),
+        _cU(cU),
+        _dU(dU),
+        _aV(aV),
+        _bV(bV),
+        _cV(cV),
+        _dV(dV),
+        _arcLength(arcLength) {
+        _polyU.Set(aU, bU, cU, dU);
+        _polyV.Set(aV, bV, cV, dV);
+        PreComputeSpline();
+    }
+
+    double GetaU() const {
+      return _aU;
+    }
+    double GetbU() const {
+      return _bU;
+    }
+    double GetcU() const {
+      return _cU;
+    }
+    double GetdU() const {
+      return _dU;
+    }
+    double GetaV() const {
+      return _aV;
+    }
+    double GetbV() const {
+      return _bV;
+    }
+    double GetcV() const {
+      return _cV;
+    }
+    double GetdV() const {
+      return _dV;
+    }
+
+    DirectedPoint PosFromDist(double dist) const override;
+
+    std::pair<float, float> DistanceTo(const geom::Location &) const override;
+
+  private:
+
+    geom::CubicPolynomial _polyU;
+    geom::CubicPolynomial _polyV;
+    double _aU;
+    double _bU;
+    double _cU;
+    double _dU;
+    double _aV;
+    double _bV;
+    double _cV;
+    double _dV;
+    bool _arcLength;
+
+    struct RtreeValue {
+      double u = 0;
+      double v = 0;
+      double s = 0;
+      double t_u = 0;
+      double t_v = 0;
+    };
+    using Rtree = geom::SegmentCloudRtree<RtreeValue, 1>;
+    using TreeElement = Rtree::TreeElement;
+    Rtree _rtree;
+    void PreComputeSpline();
   };
 
 } // namespace element
