@@ -8,13 +8,17 @@
 
 #include "WheeledVehicle.h"
 
+#include "Vehicle/AckermannController.h"
+#include "Vehicle/AckermannControllerSettings.h"
 #include "Vehicle/CarlaWheeledVehicleState.h"
+#include "Vehicle/VehicleAckermannControl.h"
 #include "Vehicle/VehicleControl.h"
 #include "Vehicle/VehicleLightState.h"
 #include "Vehicle/VehicleInputPriority.h"
 #include "Vehicle/VehiclePhysicsControl.h"
 #include "VehicleVelocityControl.h"
 #include "WheeledVehicleMovementComponent4W.h"
+#include "WheeledVehicleMovementComponentNW.h"
 #include "VehicleAnimInstance.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "MovementComponents/BaseCarlaMovementComponent.h"
@@ -26,6 +30,8 @@
 #include "CarSimMovementComponent.h"
 #endif
 //-------------------------------------------
+
+#include <utility>
 
 #include "CarlaWheeledVehicle.generated.h"
 
@@ -84,6 +90,13 @@ public:
   const FVehicleControl &GetVehicleControl() const
   {
     return LastAppliedControl;
+  }
+
+  /// Vehicle Ackermann control currently applied to this vehicle.
+  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  const FVehicleAckermannControl &GetVehicleAckermannControl() const
+  {
+    return LastAppliedAckermannControl;
   }
 
   /// Transform of the vehicle. Location is shifted so it matches center of the
@@ -148,6 +161,11 @@ public:
   FVehiclePhysicsControl GetVehiclePhysicsControl() const;
 
   UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  FAckermannControllerSettings GetAckermannControllerSettings() const {
+    return AckermannController.GetSettings();
+  }
+
+  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
   void RestoreVehiclePhysicsControl();
 
   UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
@@ -155,10 +173,16 @@ public:
 
   void ApplyVehiclePhysicsControl(const FVehiclePhysicsControl &PhysicsControl);
 
+  void ApplyAckermannControllerSettings(const FAckermannControllerSettings &AckermannControllerSettings) {
+    return AckermannController.ApplySettings(AckermannControllerSettings);
+  }
+
   UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
   void SetSimulatePhysics(bool enabled);
 
   void SetWheelCollision(UWheeledVehicleMovementComponent4W *Vehicle4W, const FVehiclePhysicsControl &PhysicsControl);
+
+  void SetWheelCollisionNW(UWheeledVehicleMovementComponentNW *VehicleNW, const FVehiclePhysicsControl &PhysicsControl);
 
   void SetVehicleLightState(const FVehicleLightState &LightState);
 
@@ -178,11 +202,29 @@ public:
   UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
   void ApplyVehicleControl(const FVehicleControl &Control, EVehicleInputPriority Priority)
   {
+    if (bAckermannControlActive) {
+      AckermannController.Reset();
+    }
+    bAckermannControlActive = false;
+
     if (InputControl.Priority <= Priority)
     {
       InputControl.Control = Control;
       InputControl.Priority = Priority;
     }
+  }
+
+  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  void ApplyVehicleAckermannControl(const FVehicleAckermannControl &AckermannControl, EVehicleInputPriority Priority)
+  {
+    bAckermannControlActive = true;
+    LastAppliedAckermannControl = AckermannControl;
+    AckermannController.SetTargetPoint(AckermannControl);
+  }
+
+  bool IsAckermannControlActive() const
+  {
+    return bAckermannControlActive;
   }
 
   UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
@@ -296,7 +338,14 @@ private:
   InputControl;
 
   FVehicleControl LastAppliedControl;
+  FVehicleAckermannControl LastAppliedAckermannControl;
   FVehiclePhysicsControl LastPhysicsControl;
+
+  bool bAckermannControlActive = false;
+  FAckermannController AckermannController;
+
+  float RolloverBehaviorForce = 0.35;
+  int RolloverBehaviorTracker = 0;
 
 public:
 
@@ -328,6 +377,9 @@ public:
   float CarSimOriginOffset = 150.f;
 //-------------------------------------------
 
+  UPROPERTY(Category="CARLA Wheeled Vehicle", VisibleAnywhere)
+  bool bIsNWVehicle = false;
+
 private:
 
   UPROPERTY(Category="CARLA Wheeled Vehicle", VisibleAnywhere)
@@ -349,5 +401,12 @@ private:
 
   UPROPERTY(Category="CARLA Wheeled Vehicle", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
   TMap<UPrimitiveComponent*, UPhysicsConstraintComponent*> CollisionDisableConstraints;
+
+  /// Rollovers tend to have too much angular velocity, resulting in the vehicle doing a full 360º flip.
+  /// This function progressively reduces the vehicle's angular velocity so that it ends up upside down instead.
+  UFUNCTION(Category = "CARLA Wheeled Vehicle", BlueprintCallable)
+  void ApplyRolloverBehavior();
+
+  void CheckRollover(const float roll, const std::pair<float, float> threshold_roll);
 
 };
