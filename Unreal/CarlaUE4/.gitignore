@@ -1,3 +1,23 @@
+# Scoomatic specific changes based on https://stackoverflow.com/questions/5533050/gitignore-exclude-folder-but-include-specific-subfolder
+
+!Content/
+Content/*
+!Content/Carla/
+Content/Carla/*
+!Content/Carla/Blueprints/
+Content/Carla/Blueprints/*
+!Content/Carla/Blueprints/Vehicles/
+Content/Carla/Blueprints/Vehicles/*
+!Content/Carla/Blueprints/Vehicles/Scoomatic/
+!Content/Carla/Blueprints/Vehicles/VehicleFactory.uasset
+!Content/Carla/Static/
+Content/Carla/Static/*
+!Content/Carla/Static/Vehicles/
+Content/Carla/Static/Vehicles/*
+!Content/Carla/Static/Vehicles/4Wheeled/
+Content/Carla/Static/Vehicles/4Wheeled/*
+!Content/Carla/Static/Vehicles/4Wheeled/Scoomatic/
+
 Binaries
 Build
 Debug
@@ -13,7 +33,7 @@ Plugins/Carla/DerivedDataCache
 Plugins/Carla/Intermediate
 Plugins/Carla/Saved
 
-/Content
+# /Content
 Config/CarlaSettings.ini
 Config/DefaultEditor.ini
 Config/CarSimConfig.ini
@@ -23,3 +43,9 @@ Config/CarSimConfig.ini
 .vscode
 CMakeLists.txt
 Makefile
+
+# Scoomatic specific changes
+
+!Content/Carla/Blueprints/Vehicles/Scoomatic/*
+!Content/Carla/Blueprints/Vehicles/VehicleFactory.uasset
+!Content/Carla/Static/Vehicles/4Wheeled/Scoomatic/*
