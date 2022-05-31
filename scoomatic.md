@@ -12,3 +12,8 @@ Ask @ll7 for the following files if you want a vehicle on your own:
 - Creating a simplified virtual Scoomatic from Scretch in Blender for Carla
 - How to rig vehicle in blender 2.8 for Unreal Engine 4
 - Add a new vehicle - CARLA Simulator
+
+Files can be found in an old Version in the Scoomatic Folder
+
+Blender files can be found here: https://git.rz.uni-augsburg.de/luttkule/scoomatic-carla/-/tree/master/Blender/ReintegrateScoomatic `Scoomatic.fbx`
+
