@@ -45,6 +45,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_DIR" >/dev/null
 
 CONTENT_FOLDER="${SCRIPT_DIR}/Unreal/CarlaUE4/Content/Carla"
+BACKUP_CONTENT_FOLDER="${CONTENT_FOLDER}_$(date +%Y%m%d%H%M%S)"
 
 CONTENT_ID=$(tac $SCRIPT_DIR/Util/ContentVersions.txt | egrep -m 1 . | rev | cut -d' ' -f1 | rev)
 CONTENT_LINK=http://carla-assets.s3.amazonaws.com/${CONTENT_ID}.tar.gz
@@ -52,23 +53,17 @@ CONTENT_LINK=http://carla-assets.s3.amazonaws.com/${CONTENT_ID}.tar.gz
 VERSION_FILE="${CONTENT_FOLDER}/.version"
 
 function download_content {
-  if [[ -d "$CONTENT_FOLDER" ]]; then
-    echo "This would have backed up the resources, but for Scoomatic this is skipped ..."
-    #mv -v "$CONTENT_FOLDER" "${CONTENT_FOLDER}_$(date +%Y%m%d%H%M%S)"
+
+  # create to content folder to unzip to (in case it does not exist)
+  if [ ! -d "$CONTENT_FOLDER" ]; then
+    mkdir -p "$CONTENT_FOLDER"
+    mkdir -p Content
   fi
-  mkdir -p "$CONTENT_FOLDER"
-  mkdir -p Content
-  if hash aria2c 2>/dev/null; then
-    echo -e "${CONTENT_LINK}\n\tout=Content.tar.gz" > .aria2c.input
-    aria2c -j16 -x16 --input-file=.aria2c.input
-    rm -f .aria2c.input
-  else
-    wget -c ${CONTENT_LINK} -O Content.tar.gz
-  fi
-  tar -xvzf Content.tar.gz -C Content
-  rm Content.tar.gz
-  mv Content/* "$CONTENT_FOLDER"
-  rm -rf Content
+
+  # unzip with overwrite
+  echo "Downloading contents from $CONTENT_LINK and unpacking them to $CONTENT_FOLDER"
+  wget -qO- "$CONTENT_LINK" | tar xz -C "$CONTENT_FOLDER"
+
   echo "$CONTENT_ID" > "$VERSION_FILE"
   echo "Content updated successfully."
 }
