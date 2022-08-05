@@ -53,8 +53,8 @@ VERSION_FILE="${CONTENT_FOLDER}/.version"
 
 function download_content {
   if [[ -d "$CONTENT_FOLDER" ]]; then
-    echo "Backing up existing Content..."
-    mv -v "$CONTENT_FOLDER" "${CONTENT_FOLDER}_$(date +%Y%m%d%H%M%S)"
+    echo "This would have backed up the resources, but for Scoomatic this is skipped ..."
+    #mv -v "$CONTENT_FOLDER" "${CONTENT_FOLDER}_$(date +%Y%m%d%H%M%S)"
   fi
   mkdir -p "$CONTENT_FOLDER"
   mkdir -p Content
