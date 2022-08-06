@@ -1,0 +1,26 @@
+FROM carla-prerequisites:latest
+
+ARG CARLA_REPO=https://github.com/ll7/carla
+ARG CARLA_BRANCH=ll7/scoomatic/0.9.13/simple-reimp
+
+USER carla
+WORKDIR /home/carla
+
+RUN cd /home/carla/ && \
+    if [ -z ${CARLA_BRANCH+x} ]; then git clone --depth 1 $CARLA_REPO; \
+    else git clone --depth 1 --branch $CARLA_BRANCH $CARLA_REPO; fi
+
+WORKDIR /home/carla/carla
+ADD Update.sh .
+#ADD Util/BuildTools/BuildUtilsDocker.sh ./Util/BuildTools/
+
+RUN ./Update.sh
+RUN make CarlaUE4Editor
+RUN make PythonAPI
+
+ADD Util/BuildTools/BuildUtilsDocker.sh ./Util/BuildTools/
+RUN make build.utils
+RUN make package
+
+# && rm -r /home/carla/carla/Dist
+# this deletes all the packaged files ... so stupid ...
