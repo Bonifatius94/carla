@@ -11,10 +11,6 @@ RUN if [ -z ${CARLA_BRANCH+x} ]; then git clone --depth 1 $CARLA_REPO; \
     else git clone --depth 1 --branch $CARLA_BRANCH $CARLA_REPO; fi
 
 WORKDIR /home/carla/carla
-ADD Update.sh .
-ADD Util/BuildTools/BuildUtilsDocker.sh ./Util/BuildTools/
-ADD Scoomatic/Carla.tar.gz ./Unreal/CarlaUE4/Content/
-
 RUN ./Update.sh
 RUN make CarlaUE4Editor
 RUN make PythonAPI
