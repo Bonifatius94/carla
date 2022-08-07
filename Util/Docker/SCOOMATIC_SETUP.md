@@ -52,14 +52,6 @@ This tutorial is following the steps from
 https://github.com/carla-simulator/carla/blob/master/Util/Docker/README.md,
 but there are some twitsts to fix the inconsistencies.
 
-### Unreal Engine Docker Tools Setup
-Set up the Unreal Engine Docker build environment.
-
-```sh
-python3 -m pip install ue4-docker
-ue4-docker setup
-```
-
 ### Clone the CARLA Source Code
 
 ```sh

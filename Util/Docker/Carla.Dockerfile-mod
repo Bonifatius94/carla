@@ -1,7 +1,7 @@
 FROM carla-prerequisites:latest as build-env
 
-ARG CARLA_REPO=https://github.com/ll7/carla
-ARG CARLA_BRANCH=ll7/scoomatic/0.9.13/simple-reimp
+ARG CARLA_REPO=https://github.com/Bonifatius94/carla
+ARG CARLA_BRANCH=keep-scoomatic-resources-during-update
 
 USER carla
 WORKDIR /home/carla
@@ -13,12 +13,15 @@ RUN if [ -z ${CARLA_BRANCH+x} ]; then git clone --depth 1 $CARLA_REPO; \
 WORKDIR /home/carla/carla
 ADD Update.sh .
 ADD Util/BuildTools/BuildUtilsDocker.sh ./Util/BuildTools/
+ADD Scoomatic/Carla.tar.gz ./Unreal/CarlaUE4/Content/
 
 RUN ./Update.sh
 RUN make CarlaUE4Editor
 RUN make PythonAPI
 RUN make build.utils
 RUN make package
+# TODO: chain this in one RUN and remove the temporary files
+#       -> make the docker layer smaller
 
 FROM nvidia/vulkan:1.1.121-cuda-10.1--ubuntu18.04 as runtime
 
@@ -36,7 +39,7 @@ RUN apt-key adv --fetch-keys \
 
 # info: this is just required for client-side PythonAPI example scripts
 #       technically you don't need this to run just the simulator as headless server
-RUN apt-get update && 
+RUN apt-get update && apt-get install -y \
         libjpeg-dev libpng-dev libtiff-dev python3-pip && \
     apt-get clean && \
     python3 -m pip install pip --upgrade && python3 -m pip install pygame

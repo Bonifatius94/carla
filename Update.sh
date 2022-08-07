@@ -63,6 +63,7 @@ function download_content {
   # unzip with overwrite
   echo "Downloading contents from $CONTENT_LINK and unpacking them to $CONTENT_FOLDER"
   wget -qO- "$CONTENT_LINK" | tar xz -C "$CONTENT_FOLDER"
+  tar -xzf Scoomatic/Carla.tar.gz
 
   echo "$CONTENT_ID" > "$VERSION_FILE"
   echo "Content updated successfully."
