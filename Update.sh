@@ -46,6 +46,7 @@ pushd "$SCRIPT_DIR" >/dev/null
 
 CONTENT_FOLDER="${SCRIPT_DIR}/Unreal/CarlaUE4/Content/Carla"
 BACKUP_CONTENT_FOLDER="${CONTENT_FOLDER}_$(date +%Y%m%d%H%M%S)"
+SCOOMATIC_ARCHIVE=Scoomatic/Carla.tar.gz
 
 CONTENT_ID=$(tac $SCRIPT_DIR/Util/ContentVersions.txt | egrep -m 1 . | rev | cut -d' ' -f1 | rev)
 CONTENT_LINK=http://carla-assets.s3.amazonaws.com/${CONTENT_ID}.tar.gz
@@ -54,16 +55,17 @@ VERSION_FILE="${CONTENT_FOLDER}/.version"
 
 function download_content {
 
-  # create to content folder to unzip to (in case it does not exist)
-  if [ ! -d "$CONTENT_FOLDER" ]; then
-    mkdir -p "$CONTENT_FOLDER"
-    mkdir -p Content
+  echo "ensuring there's an empty $CONTENT_FOLDER dir"
+  if [ -d "$CONTENT_FOLDER" ]; then
+    mv "$CONTENT_FOLDER" "$BACKUP_CONTENT_FOLDER"
   fi
+  mkdir -p "$CONTENT_FOLDER"
 
-  # unzip with overwrite
-  echo "Downloading contents from $CONTENT_LINK and unpacking them to $CONTENT_FOLDER"
+  echo "downloading contents from $CONTENT_LINK and unpacking them to $CONTENT_FOLDER"
   wget -qO- "$CONTENT_LINK" | tar xz -C "$CONTENT_FOLDER"
-  tar -xzf Scoomatic/Carla.tar.gz -C "$CONTENT_FOLDER"
+
+  echo "unpacking Scoomatic contents (with overwrite)"
+  tar -xzf "$SCOOMATIC_ARCHIVE" -C "$CONTENT_FOLDER"
 
   echo "$CONTENT_ID" > "$VERSION_FILE"
   echo "Content updated successfully."
