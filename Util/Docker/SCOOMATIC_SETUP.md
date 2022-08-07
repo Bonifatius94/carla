@@ -8,7 +8,7 @@ This tutorial shows how to build the scoomatic vehicle as Docker container.
 
 ### Machine Setup and Requirements
 
-| REquirement | Description |
+| Requirement | Description |
 | ----------- | ----------- |
 | Free Disk Space: | ~ 200-300 GB |
 | Available RAM:   |    16 GB |
@@ -84,16 +84,27 @@ docker build -t carla:latest -f Util/Docker/Carla.Dockerfile-mod .
 docker run --privileged --gpus all \
     --net=host -e 2000-2002 \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    carla:latest -RenderOffScreen
+    --name carla_sim carla:latest
+
+# stop simulator with 'docker stop carla_sim'
 ```
 
-### Remote-Control Via Python
+### Spawn + Remote-Control Scoomatic Via PythonAPI
 
-Launch another container of the CARLA simulator as PythonAPI client:
+Setup Python on the host system to test against the simulator instance:
 
 ```sh
-docker run -it --net=host --entrypoint=bash carla:latest
-# TODO: figure out how to display the pygame to UI
+sudo apt-get update && sudo apt-get install -y python3-pip
+python3 -m pip install pip --upgrade
+python3 -m pip install numpy pygame
+```
+
+Copy the PythonAPI from the simulator instance onto the host machine:
+
+```sh
+mkdir temp
+docker cp carla_sim:/home/carla/PythonAPI ./temp/
+cd temp
 ```
 
 Check if the carla package can be imported:
@@ -105,13 +116,24 @@ python3 -c 'import carla'
 if [ $? -eq 0 ]; then echo 'carla import successful!'; fi
 ```
 
+Check if the Scoomatic vehicle is registered:
+
+```py
+import carla
+
+client = carla.Client('localhost', 2000)
+world = client.get_world()
+
+vehicle_blueprints = world.get_blueprint_library().filter('*vehicle*')
+print('all vehicles:', vehicle_blueprints)
+print('==========================================')
+print('scoomatic vehicles:', vehicle_blueprints.filter('*scoomatic*'))
+```
+
 Spawn a new vehicle and control it via the keyboard:
 
 ```sh
-VEHICLE_NAME_WILDCARD=*scoomatic*
-
-cd PythonAPI/examples
-python3 manual_control.py --filter $VEHICLE_NAME_WILDCARD
+python3 PythonAPI/examples/manual_control.py --filter *scoomatic*
 ```
 
 ## Author

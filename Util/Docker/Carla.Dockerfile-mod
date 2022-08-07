@@ -16,7 +16,7 @@ RUN make CarlaUE4Editor
 RUN make PythonAPI
 RUN make build.utils
 RUN make package
-# TODO: chain this in one RUN and remove the temporary files
+# TODO: chain this in one RUN and remove the temporary build files afterwards
 #       -> make the docker layer smaller
 
 FROM nvidia/vulkan:1.1.121-cuda-10.1--ubuntu18.04 as runtime
@@ -32,13 +32,6 @@ RUN apt-key adv --fetch-keys \
     apt-get install -y \
         xdg-user-dirs xdg-utils && \
     apt-get clean
-
-# info: this is just required for client-side PythonAPI example scripts
-#       technically you don't need this to run just the simulator as headless server
-RUN apt-get update && apt-get install -y \
-        libjpeg-dev libpng-dev libtiff-dev python3-pip && \
-    apt-get clean && \
-    python3 -m pip install pip --upgrade && python3 -m pip install pygame
 
 USER carla
 EXPOSE 2000-2002
