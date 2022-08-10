@@ -16,7 +16,7 @@ This tutorial shows how to build the scoomatic vehicle as Docker container.
 | Suggested OS:    | Ubuntu 18.04 |
 
 ### Unreal Engine GitHub Access
-1) Register as Unreal developer to access the Unreal Engine GitHub repositories (required for CARLA source build)
+1) Register as Unreal developer to access the Unreal Engine GitHub repositories (required for CARLA source build) [UE source code](https://www.unrealengine.com/en-US/ue-on-github)
 2) Create a GitHub personal access token for login (pull the Unreal Engine repo)
 see GitHub docs https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 
