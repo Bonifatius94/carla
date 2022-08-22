@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+# FROM ubuntu:18.04
+FROM nvidia/vulkan:1.1.121-cuda-10.1--ubuntu18.04
 
 USER root
 

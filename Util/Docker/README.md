@@ -70,7 +70,7 @@ cd carla
 ./Update.sh
 ```
 
-### Docker Image Build
+### Build UE4 Build Environment Docker Image
 Run following commands to build the CARLA simulator.
 The build will take several hours, even on powerful machines.
 
@@ -82,7 +82,47 @@ docker build -t carla-prerequisites \
     --build-arg EPIC_USER=$GITHUB_USERNAME \
     --build-arg EPIC_PASS=$GITHUB_ACCESS_TOKEN \
     -f Util/Docker/Prerequisites.Dockerfile .
+```
 
+### Use Local Carla UE4 Development Tools With Docker
+For local development, you would often require the CARLAUE4Editor
+for integrating custom Unreal assets, etc. This workflow is also
+encapsulated within a dockerized build environment as follows.
+
+First, build the Docker image used as build environment:
+
+```sh
+docker build -f Util/Docker/Localbuildenv.Dockerfile . -t carla-localbuildenv:latest
+```
+
+Now, you can spin a build environment up using Docker-Compose.
+It mounts the locally checked-out Git repository into the
+container and executes commands like e.g. "make launch":
+
+```sh
+docker-compose -f build-compose.yml run carla-build-machine <your command>
+docker-compose -f build-compose.yml run carla-build-machine make launch
+```
+
+As we've added GPU support to the build environment, the CarlaUE4Editor
+will show up on the host machine while still running within the container.
+So, you can basically use the build environment like a local source build,
+but you don't have to care about toolchain setup anymore. Everything is
+abstracted by Docker.
+
+![](./CarlaUE4Editor%20within%20Docker.png)
+
+If you need to run more complex commands, you can also attach to the
+container with an interactive bash session, see following command:
+
+```sh
+docker-compose -f build-compose.yml run carla-build-machine bash
+```
+
+### Build Carla Simulator Docker Image
+For releasing the simulator as Docker image, run following command.
+
+```sh
 docker build -t carla:latest -f Util/Docker/Carla.Dockerfile .
 ```
 
