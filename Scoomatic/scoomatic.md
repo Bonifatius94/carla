@@ -1,11 +1,16 @@
 # How to use the Scoomatic
 
-Build carla **0.9.13** on linux according to their documentation online. Including `make PythonAPI` and `make launch` to make sure everything works before you change anything.
+Build carla **0.9.13** on linux according to their documentation online. Including `make PythonAPI`
+and `make launch` to make sure everything works before you change anything.
 
-After `./Update.sh` to download the assets, carla will remove the pulled scoomatic files.
-Downloading the assets is not accumulative, but instead the whole content folder will be replaced.
-Therefore, you have to revert the changes after downloading the assets.
-Due to the complex ignore structure, the scoomatic is now included in the logic repository of carla.
+`TODO: replace this with instructions to execute the Docker-Compose build`
+
+The `./Update.sh` of this fork is configured to move the existing contents to an intermediate directory,
+then pull all official contents via network and extract the Scoomatic-specific contents
+from [Carla.tar.gz](./Carla.tar.gz) with overwrite. So, if you've made any changes to Scoomatic assets
+your changes are not lost, but you'll need to copy them from the intermediate folder back into
+the `Unreal/CarlaUE4/Content/Carla` folder. Also, if you want to persist your asset changes,
+just zip your Scoomatic files and commit your version of `Carla.tar.gz` via Git.
 
 Ask @ll7 for the following files if you want a vehicle on your own:
 
@@ -15,5 +20,6 @@ Ask @ll7 for the following files if you want a vehicle on your own:
 
 Files can be found in an old Version in the Scoomatic Folder
 
-Blender files can be found here: https://git.rz.uni-augsburg.de/luttkule/scoomatic-carla/-/tree/master/Blender/ReintegrateScoomatic `Scoomatic.fbx`
-
+Blender files can be found here:
+https://git.rz.uni-augsburg.de/luttkule/scoomatic-carla/-/tree/master/Blender/ReintegrateScoomatic
+`Scoomatic.fbx`
