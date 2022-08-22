@@ -1,0 +1,13 @@
+.vscode
+Content
+Intermediate
+Plugins/Carla/CarlaDependencies
+Plugins/Carla/Content
+Plugins/Carla/Intermediate
+Plugins/CarlaExporter/Intermediate
+
+# Scoomatic specific changes
+
+!Content/Carla/Blueprints/Vehicles/Scoomatic/*
+!Content/Carla/Blueprints/Vehicles/VehicleFactory.uasset
+!Content/Carla/Static/Vehicles/4Wheeled/Scoomatic/*

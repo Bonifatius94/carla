@@ -49,6 +49,7 @@ BACKUP_FOLDER="${CONTENT_FOLDER}_$(date +%Y%m%d%H%M%S)"
 
 CONTENT_ID=$(tac $SCRIPT_DIR/Util/ContentVersions.txt | egrep -m 1 . | rev | cut -d' ' -f1 | rev)
 CONTENT_LINK=http://carla-assets.s3.amazonaws.com/${CONTENT_ID}.tar.gz
+SCOOMATIC_ARCHIVE=Scoomatic/Carla.tar.gz
 
 VERSION_FILE="${CONTENT_FOLDER}/.version"
 
@@ -70,6 +71,7 @@ function download_content {
   else
     wget -qO- "$CONTENT_LINK" | tar xz -C "$CONTENT_FOLDER"
   fi
+  tar -xzf "$SCOOMATIC_ARCHIVE" -C "$CONTENT_FOLDER"
 
   echo "$CONTENT_ID" > "$VERSION_FILE"
   echo "Content updated successfully."
