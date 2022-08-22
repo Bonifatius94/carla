@@ -1,0 +1,17 @@
+version: "2.3"
+
+services:
+  carla-build-machine:
+    image: carla-prerequisites:latest
+    runtime: nvidia
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - '.:/home/carla'
+      - '/tmp/.X11-unix:/tmp/.X11-unix:rw'
+    environment:
+      DISPLAY: ${DISPLAY}
+      SDL_VIDEODRIVER: x11
+      SDL_HINT_CUDA_DEVICE: 0
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
