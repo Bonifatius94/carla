@@ -118,7 +118,7 @@ So, you can basically use the build environment like a local source build,
 but you don't have to care about toolchain setup anymore. Everything is
 abstracted by Docker.
 
-![](./CarlaUE4Editor%20within%20Docker.png)
+![Editor within Docker](./CarlaUE4Editor%20within%20Docker.png)
 
 If you need to run more complex commands, you can also attach to the
 container with an interactive bash session, see following command:
