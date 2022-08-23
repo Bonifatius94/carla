@@ -3,6 +3,7 @@ FROM nvidia/vulkan:1.1.121-cuda-10.1--ubuntu18.04
 
 USER root
 
+ARG UID=1000
 ARG EPIC_USER=user
 ARG EPIC_PASS=pass
 ENV DEBIAN_FRONTEND=noninteractive
@@ -42,7 +43,7 @@ RUN apt-get update ; \
   update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-8/bin/clang++ 180 && \
   update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-8/bin/clang 180
 
-RUN useradd -m carla && chown carla:carla /home/carla
+RUN useradd -m -u $UID carla && chown carla:carla /home/carla
 USER carla
 ENV UE4_ROOT /home/carla/UE4.26
 ARG UE4_GITHUB_URL="https://${EPIC_USER}:${EPIC_PASS}@github.com/CarlaUnreal/UnrealEngine.git"
