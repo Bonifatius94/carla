@@ -65,6 +65,8 @@ This section shows how to build the CARLA repository with Docker.
 
 ### Clone the CARLA Source Code
 
+Clone the Source Code and download the assets:
+
 ```sh
 CARLA_REPO=https://github.com/carla-simulator/carla
 CARLA_BRANCH=master
