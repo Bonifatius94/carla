@@ -2,6 +2,7 @@
 # Dockerized CARLA Build
 
 ## About
+
 This tutorial shows how to build the CARLA simulator with Docker.
 
 ## Prerequisites
@@ -16,11 +17,13 @@ This tutorial shows how to build the CARLA simulator with Docker.
 | Suggested OS:    | Ubuntu 18.04 (because of Python 3.6) |
 
 ### Unreal Engine GitHub Access
+
 1) Register as Unreal developer to access the Unreal Engine GitHub repositories, see this [official EPIC tutorial](https://www.unrealengine.com/en-US/ue-on-github)
 2) Create a GitHub personal access token for login (pull the Unreal Engine repo),
 see [official GitHub docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 
 ### OS Setup
+
 Install the latest updates.
 
 ```sh
@@ -32,7 +35,7 @@ reboot
 
 1) Choose a **proprietary** NVIDIA driver (don't waste time with the open source one!!!)
 
-![](./nvidia-driver-selection.png)
+![Nvidia Driver Selection](./nvidia-driver-selection.png)
 
 2) Execute following commands to install Docker with GPU support
 
@@ -57,6 +60,7 @@ sudo usermod -aG docker $USER && reboot
 ```
 
 ## Build Steps
+
 This section shows how to build the CARLA repository with Docker.
 
 ### Clone the CARLA Source Code
@@ -71,6 +75,7 @@ cd carla
 ```
 
 ### Build UE4 Build Environment Docker Image
+
 Run following commands to build the CARLA simulator.
 The build will take several hours, even on powerful machines.
 
@@ -85,6 +90,7 @@ docker build -t carla-prerequisites \
 ```
 
 ### Use Local Carla UE4 Development Tools With Docker
+
 For local development, you would often require the CARLAUE4Editor
 for integrating custom Unreal assets, etc. This workflow is also
 encapsulated within a dockerized build environment as follows.
@@ -120,6 +126,7 @@ docker-compose -f build-compose.yml run carla-build-machine bash
 ```
 
 ### Build Carla Simulator Docker Image
+
 For releasing the simulator as Docker image, run following command.
 
 ```sh
@@ -135,6 +142,7 @@ docker image ls | grep 'carla'
 ## Example Usage
 
 ### Launch Simulator
+
 Now that the build completed, you can launch the CARLA simulator
 as headless, GPU-empowered backend service.
 
@@ -197,6 +205,7 @@ docker stop carla_sim'
 ```
 
 ## Other Useful Commands
+
 Delete all dangling images and containers to free up your disk again.
 
 ```sh
