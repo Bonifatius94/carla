@@ -103,7 +103,7 @@ First, build the Docker image used as build environment:
 docker build -f Util/Docker/Localbuildenv.Dockerfile . -t carla-localbuildenv:latest
 ```
 
-Now, you can spin a build environment up using Docker-Compose.
+Now, you can spin up a build environment using Docker-Compose.
 It mounts the locally checked-out Git repository into the
 container and executes commands like e.g. "make launch":
 
@@ -126,6 +126,13 @@ container with an interactive bash session, see following command:
 ```sh
 docker-compose -f build-compose.yml run carla-build-machine bash
 ```
+
+*Note that you could potentially run into file permission problems when
+using a machine with multiple user accounts.
+It's important that the carla user's id inside the Docker container (id=1000)
+matches your currently logged-in user's id on your host system.
+Usually the first account created on the host system has id=1000,
+so that's why you should be careful when using multi-user systems.*
 
 ### Build Carla Simulator Docker Image
 
